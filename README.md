@@ -25,14 +25,14 @@ A Next.js web application that helps people with ADHD complete household chores 
 ### Prerequisites
 
 - Node.js 18+ 
-- ElevenLabs API key
+- ElevenLabs API key (keep this secure and never commit to version control)
 
 ### Installation
 
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd ai-trailer
+cd chore-app
 ```
 
 2. Install dependencies:
@@ -46,9 +46,15 @@ cp .env.local.example .env.local
 ```
 
 Add your API configuration to `.env.local`:
+```bash
+# Replace with your actual API endpoint
+NEXT_PUBLIC_API_BASE=https://your-api-endpoint.com
+
+# Add your ElevenLabs API key (NEVER commit this file to git)
+ELEVENLABS_API_KEY=your_api_key_here
 ```
-NEXT_PUBLIC_API_BASE=https://chore-api-611389647575.us-central1.run.app
-```
+
+**⚠️ Security Note**: Never commit `.env.local` or any files containing API keys to version control. The `.env.local` file is already included in `.gitignore` for security.
 
 4. Run the development server:
 ```bash
@@ -67,5 +73,12 @@ npm run dev
 
 ## API Endpoints
 
-- `POST /api/tts-proxy` - Generate chore instruction audio
+- `POST /api/tts-proxy` - Generate chore instruction audio (requires valid API key)
+
+## Security Best Practices
+
+- Never commit API keys or sensitive environment variables to version control
+- Keep your `.env.local` file secure and don't share it publicly
+- Regularly rotate your API keys
+- Use environment-specific endpoints (development, staging, production)
 
