@@ -1,0 +1,4 @@
+{
+  "/api/tts-proxy/route": "app/api/tts-proxy/route.js",
+  "/page": "app/page.js"
+}
