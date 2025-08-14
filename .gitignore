@@ -1,6 +1,7 @@
 # Dependencies
 chore/node_modules/
 chore/.next/
+chore/.next/**
 chore/npm-debug.log*
 chore/yarn-debug.log*
 chore/yarn-error.log*
