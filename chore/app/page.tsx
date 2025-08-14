@@ -66,7 +66,7 @@ export default function Home() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        text: "Nice work! You finished the chore. Take a breath, hydrate, and enjoy the clean space.",
+        text: "Nice work! You finished the chore. Take a breath, hydrate, and enjoy your accomplishment!",
         voice_id: defaultVoiceId
       })
     });
@@ -107,7 +107,7 @@ export default function Home() {
       <div className="p-6 max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-4">ADHD Chore Chart</h1>
-          <p className="text-gray-400 text-lg">Find and complete your daily tasks with guided audio instructions</p>
+          <p className="text-gray-400 text-lg">Complete your daily tasks with guided audio instructions</p>
         </div>
 
         {!sel && (
@@ -173,7 +173,7 @@ export default function Home() {
                 <div className="mb-6 p-4 bg-blue-900 border border-blue-700 rounded-lg text-blue-200">
                   <div className="flex items-center gap-2">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-400"></div>
-                    🔊 Generating audio...
+                    Generating audio...
                   </div>
                 </div>
               )}
@@ -239,7 +239,7 @@ export default function Home() {
               )}
 
               {checked.length > 0 && checked.every(Boolean) && !congratsPlaying && (
-                <div className="mt-6 p-6 bg-gradient-to-r from-green-900 to-blue-900 border border-green-700 rounded-lg text-center">
+                <div className="mt-6 p-6 bg-green-900 border border-green-700 rounded-lg text-center">
                   <div className="text-2xl mb-2">🎉</div>
                   <h3 className="text-xl font-bold text-white mb-2">Congratulations!</h3>
                   <p className="text-green-200">You completed all the steps! Great job!</p>
