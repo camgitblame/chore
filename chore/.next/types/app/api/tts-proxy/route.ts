@@ -1,4 +1,4 @@
-// File: /Users/camnguyen/Desktop/MovieApp/chore/app/api/tts-proxy/route.ts
+// File: /Users/camnguyen/Desktop/chore_app/chore/app/api/tts-proxy/route.ts
 import * as entry from '../../../../../app/api/tts-proxy/route.js'
 import type { NextRequest } from 'next/server.js'
 

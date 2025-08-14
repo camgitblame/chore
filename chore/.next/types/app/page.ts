@@ -1,4 +1,4 @@
-// File: /Users/camnguyen/Desktop/MovieApp/chore/app/page.tsx
+// File: /Users/camnguyen/Desktop/chore_app/chore/app/page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

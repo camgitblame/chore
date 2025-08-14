@@ -1,4 +1,4 @@
-// File: /Users/camnguyen/Desktop/MovieApp/chore/app/layout.tsx
+// File: /Users/camnguyen/Desktop/chore_app/chore/app/layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
