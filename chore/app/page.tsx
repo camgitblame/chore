@@ -103,11 +103,29 @@ export default function Home() {
   }, [checked.join("|")]); // watch changes compactly
 
   return (
-    <main className="min-h-screen bg-gray-900 text-white">
+    <main className="min-h-screen bg-black text-cyan-400" style={{
+      backgroundImage: `
+        radial-gradient(circle at 25% 25%, #1a0033 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, #001a33 0%, transparent 50%),
+        linear-gradient(135deg, #000000 0%, #0a0a0a 100%)
+      `
+    }}>
       <div className="p-6 max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">ADHD Chore Chart</h1>
-          <p className="text-gray-400 text-lg">Complete your daily tasks with guided audio instructions</p>
+        <div className="text-center mb-12 border-4 border-cyan-400 bg-black bg-opacity-80 p-8 rounded-none shadow-lg shadow-cyan-400/20" style={{
+          boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), inset 0 0 20px rgba(34, 211, 238, 0.1)'
+        }}>
+          <h1 className="text-5xl font-bold text-cyan-400 mb-4 tracking-widest" style={{
+            textShadow: '0 0 10px rgba(34, 211, 238, 0.8), 0 0 20px rgba(34, 211, 238, 0.5), 0 0 30px rgba(34, 211, 238, 0.3)',
+            fontFamily: 'monospace'
+          }}>
+            ▓▓ QUEST LOG ▓▓
+          </h1>
+          <p className="text-green-400 text-lg tracking-wide" style={{
+            textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
+            fontFamily: 'monospace'
+          }}>
+            &gt; Complete daily missions with audio guidance_
+          </p>
         </div>
 
         {!sel && (
@@ -116,27 +134,36 @@ export default function Home() {
               <input
                 value={q}
                 onChange={e => setQ(e.target.value)}
-                placeholder="Search chores (e.g., microwave, desk, kitchen...)"
-                className="w-full p-4 text-lg rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-lg"
+                placeholder="SEARCH MISSIONS... [TYPE HERE]"
+                className="w-full p-4 text-lg bg-black border-2 border-magenta-500 text-cyan-400 placeholder-magenta-400 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 rounded-none font-mono tracking-wide"
+                style={{
+                  boxShadow: 'inset 0 0 10px rgba(139, 69, 19, 0.3)',
+                  textShadow: '0 0 5px rgba(34, 211, 238, 0.5)'
+                }}
               />
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                🔍
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-magenta-400 text-xl">
+                ◆
               </div>
             </div>
             {q && (
               <div className="mt-6 space-y-3">
                 {chores.map(c => (
-                  <div key={c.id} className="bg-gray-800 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors">
+                  <div key={c.id} className="bg-black border-2 border-yellow-400 hover:border-cyan-400 transition-all duration-200 rounded-none" style={{
+                    boxShadow: '0 0 10px rgba(251, 191, 36, 0.3)'
+                  }}>
                     <button 
-                      className="w-full p-4 text-left hover:bg-gray-750 rounded-lg transition-colors"
+                      className="w-full p-4 text-left hover:bg-gray-900 hover:bg-opacity-50 transition-all duration-200 font-mono"
                       onClick={() => setSel(c)}
+                      style={{
+                        textShadow: '0 0 5px rgba(34, 211, 238, 0.5)'
+                      }}
                     >
                       <div className="flex justify-between items-center">
                         <div>
-                          <h3 className="text-lg font-medium text-white">{c.title}</h3>
-                          <p className="text-gray-400 text-sm mt-1">~{c.time_min} minutes</p>
+                          <h3 className="text-lg font-bold text-yellow-400 tracking-wide">▶ {c.title.toUpperCase()}</h3>
+                          <p className="text-green-400 text-sm mt-1 tracking-wide">DURATION: ~{c.time_min} MIN</p>
                         </div>
-                        <div className="text-gray-400">→</div>
+                        <div className="text-cyan-400 text-xl animate-pulse">►</div>
                       </div>
                     </button>
                   </div>
@@ -148,72 +175,138 @@ export default function Home() {
 
         {sel && (
           <div className="max-w-3xl mx-auto">
-            <div className="bg-gray-800 rounded-xl border border-gray-700 p-6 shadow-xl">
+            <div className="bg-black border-4 border-cyan-400 p-6 rounded-none" style={{
+              boxShadow: '0 0 30px rgba(34, 211, 238, 0.4), inset 0 0 30px rgba(34, 211, 238, 0.1)'
+            }}>
               <div className="flex items-center gap-4 mb-6">
                 <button 
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors text-white"
+                  className="flex items-center gap-2 px-4 py-2 bg-black border-2 border-red-500 hover:border-red-400 hover:bg-red-900 hover:bg-opacity-30 transition-all duration-200 text-red-400 font-mono tracking-wide rounded-none"
                   onClick={() => setSel(null)}
+                  style={{
+                    textShadow: '0 0 5px rgba(239, 68, 68, 0.5)',
+                    boxShadow: '0 0 10px rgba(239, 68, 68, 0.3)'
+                  }}
                 >
-                  ← Back
+                  ◄ BACK
                 </button>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold text-white">{sel.title}</h2>
-                  <p className="text-gray-400 mt-1">Estimated time: ~{sel.time_min} minutes</p>
+                  <h2 className="text-3xl font-bold text-yellow-400 tracking-widest font-mono" style={{
+                    textShadow: '0 0 10px rgba(251, 191, 36, 0.8)'
+                  }}>
+                    ▓ {sel.title.toUpperCase()} ▓
+                  </h2>
+                  <p className="text-green-400 mt-1 font-mono tracking-wide" style={{
+                    textShadow: '0 0 5px rgba(34, 197, 94, 0.5)'
+                  }}>
+                    MISSION TIME: ~{sel.time_min} MINUTES
+                  </p>
                 </div>
               </div>
 
               {sel.items?.length ? (
-                <div className="bg-gray-750 rounded-lg p-4 mb-6 border border-gray-600">
-                  <h3 className="text-lg font-semibold text-white mb-2">Items needed:</h3>
-                  <p className="text-gray-300">{sel.items.join(", ")}</p>
+                <div className="bg-black border-2 border-purple-500 p-4 mb-6 rounded-none" style={{
+                  boxShadow: '0 0 15px rgba(147, 51, 234, 0.3)'
+                }}>
+                  <h3 className="text-lg font-bold text-purple-400 mb-2 font-mono tracking-wide" style={{
+                    textShadow: '0 0 5px rgba(147, 51, 234, 0.8)'
+                  }}>
+                    ▼ REQUIRED ITEMS:
+                  </h3>
+                  <p className="text-cyan-400 font-mono tracking-wide" style={{
+                    textShadow: '0 0 5px rgba(34, 211, 238, 0.5)'
+                  }}>
+                    {sel.items.join(" • ")}
+                  </p>
                 </div>
               ) : null}
 
               {loadingSpeak && (
-                <div className="mb-6 p-4 bg-blue-900 border border-blue-700 rounded-lg text-blue-200">
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-400"></div>
-                    Generating audio...
+                <div className="mb-6 p-4 bg-black border-2 border-blue-400 text-blue-400 rounded-none" style={{
+                  boxShadow: '0 0 15px rgba(59, 130, 246, 0.4)'
+                }}>
+                  <div className="flex items-center gap-2 font-mono tracking-wide">
+                    <div className="animate-spin text-xl">◆</div>
+                    GENERATING AUDIO TRANSMISSION...
                   </div>
                 </div>
               )}
 
               <div className="flex items-center gap-3 mb-6">
                 <button 
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors border ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-none transition-all duration-200 border-2 font-mono tracking-wide ${
                     isMuted 
-                      ? 'bg-red-900 border-red-700 text-red-200 hover:bg-red-800' 
-                      : 'bg-green-900 border-green-700 text-green-200 hover:bg-green-800'
+                      ? 'bg-black border-red-500 text-red-400 hover:bg-red-900 hover:bg-opacity-30' 
+                      : 'bg-black border-green-500 text-green-400 hover:bg-green-900 hover:bg-opacity-30'
                   }`}
                   onClick={() => setIsMuted(!isMuted)}
+                  style={{
+                    textShadow: isMuted 
+                      ? '0 0 5px rgba(239, 68, 68, 0.5)' 
+                      : '0 0 5px rgba(34, 197, 94, 0.5)',
+                    boxShadow: isMuted 
+                      ? '0 0 10px rgba(239, 68, 68, 0.3)' 
+                      : '0 0 10px rgba(34, 197, 94, 0.3)'
+                  }}
                 >
-                  {isMuted ? "🔇" : "🔊"} {isMuted ? "Unmute" : "Mute"} Voice
+                  {isMuted ? "◄◄" : "►►"} {isMuted ? "AUDIO OFF" : "AUDIO ON"}
                 </button>
               </div>
 
               <div className="space-y-3">
-                <h3 className="text-lg font-semibold text-white mb-4">Steps to complete:</h3>
+                <h3 className="text-xl font-bold text-cyan-400 mb-4 font-mono tracking-widest" style={{
+                  textShadow: '0 0 10px rgba(34, 211, 238, 0.8)'
+                }}>
+                  ▼ MISSION OBJECTIVES:
+                </h3>
                 {sel.steps.map((s, i) => (
                   <div 
                     key={i} 
-                    className={`flex gap-3 items-start p-3 rounded-lg transition-colors ${
-                      checked[i] ? 'bg-green-900 border border-green-700' : 'bg-gray-750 border border-gray-600'
+                    className={`flex gap-3 items-start p-3 rounded-none transition-all duration-200 border-2 ${
+                      checked[i] 
+                        ? 'bg-green-900 bg-opacity-30 border-green-400' 
+                        : 'bg-black border-gray-600'
                     }`}
+                    style={{
+                      boxShadow: checked[i] 
+                        ? '0 0 15px rgba(34, 197, 94, 0.4)' 
+                        : '0 0 5px rgba(75, 85, 99, 0.3)'
+                    }}
                   >
-                    <input
-                      type="checkbox"
-                      className="mt-1 h-5 w-5 rounded border-gray-500 bg-gray-700 text-green-500 focus:ring-green-500 focus:ring-2"
-                      checked={checked[i] || false}
-                      onChange={() => {
-                        setChecked(prev => {
-                          const copy = [...prev];
-                          copy[i] = !copy[i];
-                          return copy;
-                        });
-                      }}
-                    />
-                    <span className={`text-sm ${checked[i] ? 'text-green-200 line-through' : 'text-gray-200'}`}>
-                      {s}
+                    <div className="mt-1">
+                      <div 
+                        className={`w-5 h-5 border-2 cursor-pointer transition-all duration-200 ${
+                          checked[i] 
+                            ? 'bg-green-400 border-green-400' 
+                            : 'bg-black border-cyan-400'
+                        }`}
+                        onClick={() => {
+                          setChecked(prev => {
+                            const copy = [...prev];
+                            copy[i] = !copy[i];
+                            return copy;
+                          });
+                        }}
+                        style={{
+                          boxShadow: checked[i] 
+                            ? '0 0 10px rgba(34, 197, 94, 0.6)' 
+                            : '0 0 5px rgba(34, 211, 238, 0.4)'
+                        }}
+                      >
+                        {checked[i] && (
+                          <div className="text-black text-center font-bold text-xs leading-none">
+                            ✓
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <span className={`text-sm font-mono tracking-wide ${
+                      checked[i] ? 'text-green-200 line-through' : 'text-cyan-400'
+                    }`} style={{
+                      textShadow: checked[i] 
+                        ? '0 0 5px rgba(34, 197, 94, 0.5)' 
+                        : '0 0 5px rgba(34, 211, 238, 0.5)'
+                    }}>
+                      {checked[i] ? '[COMPLETE]' : '[PENDING]'} {s}
                     </span>
                   </div>
                 ))}
@@ -230,19 +323,31 @@ export default function Home() {
               )}
 
               {congratsPlaying && (
-                <div className="mt-6 p-4 bg-green-900 border border-green-700 rounded-lg text-green-200">
-                  <div className="flex items-center gap-2">
-                    <div className="animate-pulse">🎉</div>
-                    Playing congratulations message...
+                <div className="mt-6 p-4 bg-black border-2 border-green-400 text-green-400 rounded-none" style={{
+                  boxShadow: '0 0 20px rgba(34, 197, 94, 0.5)'
+                }}>
+                  <div className="flex items-center gap-2 font-mono tracking-wide">
+                    <div className="animate-pulse text-xl">★</div>
+                    PLAYING VICTORY TRANSMISSION...
                   </div>
                 </div>
               )}
 
               {checked.length > 0 && checked.every(Boolean) && !congratsPlaying && (
-                <div className="mt-6 p-6 bg-green-900 border border-green-700 rounded-lg text-center">
-                  <div className="text-2xl mb-2">🎉</div>
-                  <h3 className="text-xl font-bold text-white mb-2">Congratulations!</h3>
-                  <p className="text-green-200">You completed all the steps! Great job!</p>
+                <div className="mt-6 p-6 bg-black border-4 border-yellow-400 text-center rounded-none animate-pulse" style={{
+                  boxShadow: '0 0 30px rgba(251, 191, 36, 0.6), inset 0 0 20px rgba(251, 191, 36, 0.2)'
+                }}>
+                  <div className="text-4xl mb-2 animate-bounce">★★★</div>
+                  <h3 className="text-2xl font-bold text-yellow-400 mb-2 font-mono tracking-widest" style={{
+                    textShadow: '0 0 15px rgba(251, 191, 36, 1)'
+                  }}>
+                    ▓▓ MISSION COMPLETE! ▓▓
+                  </h3>
+                  <p className="text-green-400 font-mono tracking-wide" style={{
+                    textShadow: '0 0 10px rgba(34, 197, 94, 0.8)'
+                  }}>
+                    EXCELLENT WORK, AGENT! OBJECTIVE ACHIEVED!
+                  </p>
                 </div>
               )}
             </div>
