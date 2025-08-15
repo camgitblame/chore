@@ -26,6 +26,7 @@ chore_app/
 ├── fastapi-service/    # Python backend service
 │   ├── app/            # FastAPI application
 │   └── Dockerfile      # Container configuration
+│   └──requirements.txt      
 └── README.md         
 ```
 
@@ -53,7 +54,7 @@ npm install
 3. Set up environment variables by creating `.env.local` in the `chore/` directory:
 ```bash
 # Backend API endpoint 
-NEXT_PUBLIC_API_BASE=https://api-end-points.com
+NEXT_PUBLIC_API_BASE= https://chore-api-611389647575.us-central1.run.app
 
 # Add ElevenLabs API key
 ELEVENLABS_API_KEY= elevenlabs_api_key
@@ -67,48 +68,13 @@ INTERNAL_API_KEY= internal_api_key
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+5. Open [http://localhost:3000](http://localhost:3000) . 
 
 ## How It Works
 
-1. Type chore keywords (e.g., "microwave", "desk", "kitchen") to find relevant chores
+1. Type chore keywords (e.g., "microwave", "desk", "kitchen") to find a chore
 2. Click on a chore to see the full step-by-step guide
 3. Audio instructions automatically play when you select a chore
 4. Check off each step as you complete it
-5. Get encouraging feedback when you finish all steps
-
-## API Endpoints
-
-### Frontend API Routes
-- `POST /api/tts-proxy` - Proxy for generating chore instruction audio
-
-### Backend API (FastAPI)
-- Base URL: `https://chore-api-611389647575.us-central1.run.app`
-- `GET /chores?q={query}` - Search for chores matching the query
-- `POST /tts` - Generate audio for chore instructions
-
-## Development
-
-### Frontend Development
-```bash
-cd chore
-npm run dev    # Start development server
-npm run build  # Build for production
-npm run start  # Start production server
-```
-
-### Backend Development
-The FastAPI backend is deployed on Google Cloud Run. 
-
-1. For local development:
-```bash
-cd fastapi-service
-pip install -r app/requirements.txt
-uvicorn app.main:app --reload
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
+5. A short completion sound plays when all steps are done
 
