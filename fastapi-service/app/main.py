@@ -4,8 +4,12 @@ from fastapi.responses import Response, JSONResponse
 from pydantic import BaseModel
 from typing import List, Optional
 import os, uuid, requests
+from database import init_database, get_all_chores, get_chore_by_id, search_chores
 
 app = FastAPI(title="Chore Coach API")
+
+# Initialize the database on startup
+init_database()
 
 # --- simple env config ---
 INTERNAL_API_KEY = os.getenv(
@@ -23,36 +27,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- tiny in-memory catalog (could load from JSON/file/db later) ---
-CHORES = [
-    {
-        "id": "microwave",
-        "title": "Clean the microwave",
-        "items": ["Bowl", "Water", "Vinegar or lemon", "Cloth"],
-        "steps": [
-            "Fill a bowl with water and a splash of vinegar",
-            "Microwave on high for 3 minutes",
-            "Let sit 1 minute to steam",
-            "Wipe walls, ceiling, and plate",
-            "Dry with a cloth",
-        ],
-        "time_min": 8,
-    },
-    {
-        "id": "desk",
-        "title": "Organize your desk",
-        "items": ["Trash bag", "Microfiber cloth"],
-        "steps": [
-            "Put trash in the bag",
-            "Group pens, cables, and papers",
-            "Wipe the surface",
-            "Return only daily items to the desk",
-            "Stash the rest in a drawer or box",
-        ],
-        "time_min": 10,
-    },
-]
-
 
 # --- models ---
 class TTSIn(BaseModel):
@@ -66,7 +40,7 @@ class TTSIn(BaseModel):
 
 
 def require_api_key(x_api_key: str = Header(default=None)):
-    # Optional: require a shared secret header from your Next.js server route
+    # Require a shared secret header from Next.js server route
     if INTERNAL_API_KEY and x_api_key != INTERNAL_API_KEY:
         raise HTTPException(401, "Unauthorized")
     return True
@@ -120,16 +94,18 @@ def eleven_tts(text: str, voice_id: str, stability: float, similarity: float) ->
 # --- routes ---
 @app.get("/chores")
 def list_chores(q: str = ""):
-    q = (q or "").lower()
-    res = [c for c in CHORES if q in c["title"].lower()]
+    if q:
+        res = search_chores(q.lower())
+    else:
+        res = get_all_chores()
     return {"chores": res}
 
 
 @app.get("/chores/{chore_id}")
 def get_chore(chore_id: str):
-    for c in CHORES:
-        if c["id"] == chore_id:
-            return c
+    chore = get_chore_by_id(chore_id)
+    if chore:
+        return chore
     raise HTTPException(404, "Chore not found")
 
 
@@ -144,7 +120,7 @@ def tts(payload: TTSIn, _=Depends(require_api_key)):
         # Else read a chore by id
         if not payload.chore_id:
             raise HTTPException(400, "Provide chore_id or text")
-        chore = next((c for c in CHORES if c["id"] == payload.chore_id), None)
+        chore = get_chore_by_id(payload.chore_id)
         if not chore:
             raise HTTPException(404, "Chore not found")
         script = chore_script(chore)
