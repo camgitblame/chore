@@ -1,6 +1,6 @@
 # Chore Log
 
-A Next.js web application that helps people with ADHD complete household chores through guided audio instructions and step tracking.
+A Next.js web app that makes household chores easier with audio guidance and step-by-step tracking, designed to support people with ADHD and people on the autism spectrum.
 
 ## Features
 - **Chore search**: Browse and select from a curated list of common household tasks.
