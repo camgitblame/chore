@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Database initialization script for the Chore Coach application.
-This script can be run independently to set up the SQLite database.
+Database initialization script to set up the SQLite database.
 """
 
 from database import init_database, add_chore

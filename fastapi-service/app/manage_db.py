@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Database management script for the Chore Coach application.
-Provides command-line interface to manage chores in the database.
+Database management script to provide command-line interface to manage chores in the database.
 """
 
 import sys
