@@ -53,13 +53,13 @@ npm install
 3. Set up environment variables by creating `.env.local` in the `chore/` directory:
 ```bash
 # Backend API endpoint 
-NEXT_PUBLIC_API_BASE=https://chore-api-611389647575.us-central1.run.app
+NEXT_PUBLIC_API_BASE=https://api-end-points.com
 
-# Add your ElevenLabs API key (NEVER commit this file to git)
-ELEVENLABS_API_KEY= elevenlabs_api_key_here
+# Add ElevenLabs API key
+ELEVENLABS_API_KEY= elevenlabs_api_key
 
 # Internal API key for backend communication
-INTERNAL_API_KEY= internal_api_key_here
+INTERNAL_API_KEY= internal_api_key
 ```
 
 4. Run the development server:
