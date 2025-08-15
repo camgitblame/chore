@@ -38,7 +38,7 @@ export default function Home() {
     if (!sel || isMuted) return;
     setLoadingSpeak(true); setAudioUrl(null);
 
-    // call your Next.js proxy so INTERNAL_API_KEY is not exposed
+    // call Next.js proxy so INTERNAL_API_KEY is not exposed
     const r = await fetch("/api/tts-proxy", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -118,7 +118,7 @@ export default function Home() {
             textShadow: '0 0 10px rgba(34, 211, 238, 0.8), 0 0 20px rgba(34, 211, 238, 0.5), 0 0 30px rgba(34, 211, 238, 0.3)',
             fontFamily: 'monospace'
           }}>
-            ▓▓ QUEST LOG ▓▓
+            ▓ CHORE LOG ▓ 
           </h1>
           <p className="text-green-400 text-lg tracking-wide" style={{
             textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
@@ -193,7 +193,7 @@ export default function Home() {
                   <h2 className="text-3xl font-bold text-yellow-400 tracking-widest font-mono" style={{
                     textShadow: '0 0 10px rgba(251, 191, 36, 0.8)'
                   }}>
-                    ▓ {sel.title.toUpperCase()} ▓
+                    {sel.title.toUpperCase()} 
                   </h2>
                   <p className="text-green-400 mt-1 font-mono tracking-wide" style={{
                     textShadow: '0 0 5px rgba(34, 197, 94, 0.5)'
@@ -353,6 +353,15 @@ export default function Home() {
             </div>
           </div>
         )}
+      </div>
+      
+      {/* Credit Footer */}
+      <div className="text-center pb-6">
+        <p className="text-gray-500 text-sm font-mono tracking-widest" style={{
+          textShadow: '0 0 3px rgba(107, 114, 128, 0.5)'
+        }}>
+          ▓ Developed by Cam Nguyen © 2025 ▓
+        </p>
       </div>
     </main>
   );
