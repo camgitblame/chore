@@ -118,7 +118,7 @@ export default function Home() {
             textShadow: '0 0 10px rgba(34, 211, 238, 0.8), 0 0 20px rgba(34, 211, 238, 0.5), 0 0 30px rgba(34, 211, 238, 0.3)',
             fontFamily: 'monospace'
           }}>
-            ▓ CHORE LOG ▓ 
+            CHORE LOG 
           </h1>
           <p className="text-green-400 text-lg tracking-wide" style={{
             textShadow: '0 0 5px rgba(34, 197, 94, 0.5)',
