@@ -1,4 +1,4 @@
-# ADHD Chore Chart
+# Chore Log
 
 A Next.js web application that helps people with ADHD complete household chores through guided audio instructions and step tracking.
 
