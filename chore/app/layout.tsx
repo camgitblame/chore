@@ -1,8 +1,8 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'ADHD Chore Chart',
-  description: 'Interactive chore management with voice guidance',
+  title: 'Chore Log',
+  description: 'Chore management with voice guidance',
 }
 
 export default function RootLayout({
