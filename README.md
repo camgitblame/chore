@@ -68,7 +68,11 @@ INTERNAL_API_KEY= internal_api_key
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) . 
+5. Open [http://localhost:3000](http://localhost:3000) .
+
+## Deployment
+
+The app is deployed at [https://choreapp.vercel.app](https://choreapp.vercel.app/) 
 
 ## How It Works
 
