@@ -103,14 +103,15 @@ export default function Home() {
   }, [checked.join("|")]); // watch changes compactly
 
   return (
-    <main className="min-h-screen bg-black text-cyan-400" style={{
+    <div className="min-h-screen bg-black text-cyan-400 flex flex-col" style={{
       backgroundImage: `
         radial-gradient(circle at 25% 25%, #1a0033 0%, transparent 50%),
         radial-gradient(circle at 75% 75%, #001a33 0%, transparent 50%),
         linear-gradient(135deg, #000000 0%, #0a0a0a 100%)
       `
     }}>
-      <div className="p-6 max-w-4xl mx-auto">
+      <main className="flex-1">
+        <div className="p-6 max-w-4xl mx-auto">
         <div className="text-center mb-12 border-4 border-cyan-400 bg-black bg-opacity-80 p-8 rounded-none shadow-lg shadow-cyan-400/20" style={{
           boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), inset 0 0 20px rgba(34, 211, 238, 0.1)'
         }}>
@@ -353,16 +354,17 @@ export default function Home() {
             </div>
           </div>
         )}
-      </div>
+        </div>
+      </main>
       
       {/* Credit Footer */}
-      <div className="text-center pb-6">
+      <footer className="text-center py-6">
         <p className="text-gray-500 text-sm font-mono tracking-widest" style={{
           textShadow: '0 0 3px rgba(107, 114, 128, 0.5)'
         }}>
           ▓ Developed by Cam Nguyen © 2025 ▓
         </p>
-      </div>
-    </main>
+      </footer>
+    </div>
   );
 }
