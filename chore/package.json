@@ -1,13 +1,12 @@
 {
-  "name": "ai-trailer",
+  "name": "chore-app",
   "version": "1.0.0",
-  "description": "",
+  "description": "A chore management application built with Next.js and FastAPI",
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "preprocess": "python3 scripts/build_cmu_json.py",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
