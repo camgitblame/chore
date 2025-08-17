@@ -14,6 +14,7 @@ A Next.js web app that makes household chores easier with audio guidance and ste
 - **Styling**: Tailwind CSS v4
 - **AI Voice**: ElevenLabs API
 - **Backend**: FastAPI (deployed on Google Cloud Run)
+- **Database**: SQLite
 
 ## Project Structure
 
