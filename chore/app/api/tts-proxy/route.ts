@@ -3,7 +3,7 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   try {
     const body = await req.text();
-    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://chore-api-611389647575.us-central1.run.app";
+    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://chore-api-rag-611389647575.us-central1.run.app";
     
     console.log('TTS Proxy - API Base:', API_BASE);
     console.log('TTS Proxy - Request body:', body);

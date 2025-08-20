@@ -111,10 +111,16 @@ def upload_to_gcs_and_sign(data: bytes, content_type: str = "audio/mpeg") -> str
 def eleven_tts(text: str, voice_id: str, stability: float, similarity: float) -> bytes:
     if not ELEVEN_KEY:
         raise HTTPException(500, "Missing ELEVENLABS_API_KEY")
+    
+    # Strip whitespace from API key to handle any secret formatting issues
+    api_key = ELEVEN_KEY.strip() if ELEVEN_KEY else ""
+    if not api_key:
+        raise HTTPException(500, "Invalid ELEVENLABS_API_KEY")
+    
     r = requests.post(
         f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
         headers={
-            "xi-api-key": ELEVEN_KEY,
+            "xi-api-key": api_key,
             "Accept": "audio/mpeg",
             "Content-Type": "application/json",
         },
