@@ -1,0 +1,74 @@
+{
+  "kitchen_cleaning": [
+    "Start with decluttering surfaces before deep cleaning to make the process more manageable",
+    "Use the 'top to bottom' rule - clean higher surfaces first so debris falls to lower areas",
+    "Keep cleaning supplies in a caddy or bucket for easy transport between areas",
+    "Clean as you cook to prevent buildup and reduce overwhelming cleanup sessions",
+    "Use warm water and dish soap for most surfaces - it's gentle but effective",
+    "Set a timer for each task to avoid spending too much time on one area",
+    "Play upbeat music or podcasts to make cleaning more enjoyable and maintain energy"
+  ],
+  "bathroom_cleaning": [
+    "Spray surfaces with cleaner and let them sit while you clean other areas for better results",
+    "Use an old toothbrush for detailed cleaning around faucets and tile grout",
+    "Clean mirrors and glass surfaces last to avoid streaking from other cleaning products",
+    "Keep rubber gloves handy to protect your hands and make you feel more comfortable",
+    "Replace toilet brushes regularly for better hygiene and effectiveness",
+    "Use a squeegee on shower walls after each use to prevent water spots and mildew",
+    "Ventilate the area well during and after cleaning to prevent chemical buildup"
+  ],
+  "laundry": [
+    "Set phone alarms for washing and drying cycles to prevent clothes from sitting too long",
+    "Sort clothes as you undress throughout the week to make laundry day easier",
+    "Keep a stain removal pen or spray bottle handy for immediate treatment",
+    "Fold or hang clothes immediately after drying to prevent wrinkles and re-washing",
+    "Use mesh bags for delicate items and small items like socks to prevent loss",
+    "Keep a 'dry cleaning' bag in your closet for items that need special care",
+    "Do smaller, more frequent loads rather than letting laundry pile up"
+  ],
+  "organization": [
+    "Start with one small area or drawer rather than tackling an entire room at once",
+    "Use the 'one in, one out' rule to prevent accumulation of unnecessary items",
+    "Label containers and shelves to make it easier to maintain organization",
+    "Set up systems that match your natural habits rather than fighting against them",
+    "Use clear containers when possible so you can see what's inside without opening",
+    "Schedule short 10-15 minute daily tidying sessions to prevent major cleanups",
+    "Take before and after photos to celebrate your progress and stay motivated"
+  ],
+  "general_tips": [
+    "Break large tasks into smaller, more manageable chunks to reduce overwhelm",
+    "Use timers to create urgency and prevent tasks from taking longer than necessary",
+    "Reward yourself after completing tasks to build positive associations",
+    "Keep a 'done' list alongside your to-do list to track accomplishments",
+    "Use body doubling - clean alongside a friend, family member, or virtual companion",
+    "Create a cleaning playlist with your favorite energizing songs",
+    "Remember that 'good enough' is better than perfect - done is better than perfect"
+  ],
+  "motivation": [
+    "Focus on how you'll feel after the task is complete rather than the effort required",
+    "Connect the task to your values - a clean space supports your well-being",
+    "Use positive self-talk and avoid harsh criticism during the process",
+    "Celebrate small wins and progress, not just final completion",
+    "Remember that maintaining habits is easier than constantly restarting",
+    "Find an accountability partner or use apps to track your progress",
+    "Practice self-compassion when tasks don't go as planned - tomorrow is a new day"
+  ],
+  "adhd_specific": [
+    "Use visual timers to better understand time passage during tasks",
+    "Keep supplies visible and easily accessible to reduce barriers to starting",
+    "Use the 'dopamine sandwich' approach - pair boring tasks with enjoyable activities",
+    "Take movement breaks every 15-20 minutes to maintain focus and energy",
+    "Use external reminders like phone alarms, sticky notes, or apps",
+    "Create specific homes for items to reduce the mental load of deciding where things go",
+    "Work with your energy levels - tackle harder tasks when you feel most alert"
+  ],
+  "autism_specific": [
+    "Establish consistent routines and stick to the same order of operations when possible",
+    "Use noise-canceling headphones if auditory sensitivity affects your cleaning",
+    "Choose cleaning products with scents and textures that feel comfortable to you",
+    "Create detailed step-by-step lists that you can check off for a sense of completion",
+    "Take sensory breaks when feeling overwhelmed by textures, sounds, or smells",
+    "Use preferred lighting levels - bright task lighting or softer ambient lighting as needed",
+    "Allow extra time for transitions between different types of tasks or rooms"
+  ]
+}

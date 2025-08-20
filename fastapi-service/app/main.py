@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from typing import List, Optional
 import os, uuid, requests
 from database import init_database, get_all_chores, get_chore_by_id, search_chores
+from rag.advice_generator import advice_generator
 
 app = FastAPI(title="Chore Coach API")
 
@@ -37,6 +38,11 @@ class TTSIn(BaseModel):
     voice_id: str
     stability: float = 0.4
     similarity: float = 0.8
+
+
+class AdviceRequest(BaseModel):
+    chore_id: str
+    user_context: Optional[str] = ""
 
 
 def require_api_key(x_api_key: str = Header(default=None)):
@@ -135,3 +141,30 @@ def tts(payload: TTSIn, _=Depends(require_api_key)):
         return JSONResponse({"audio_url": url, "bytes": len(audio)})
     else:
         return Response(audio, media_type="audio/mpeg")
+
+
+@app.post("/advice")
+def get_advice(payload: AdviceRequest, _=Depends(require_api_key)):
+    """Get AI-powered advice for a specific chore"""
+    chore = get_chore_by_id(payload.chore_id)
+    if not chore:
+        raise HTTPException(404, "Chore not found")
+    
+    advice = advice_generator.get_chore_advice(chore, payload.user_context)
+    
+    return {
+        "advice": advice,
+        "chore_id": payload.chore_id,
+        "rag_available": advice_generator.is_available()
+    }
+
+
+@app.get("/advice/status")
+def advice_status():
+    """Check if advice generation is available"""
+    return {
+        "advice_available": advice_generator.is_available(),
+        "ollama_available": advice_generator.ollama_client.is_available(),
+        "vector_store_available": advice_generator.vector_store.is_available(),
+        "knowledge_count": advice_generator.vector_store.get_collection_count()
+    }

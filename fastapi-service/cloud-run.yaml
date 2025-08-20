@@ -1,0 +1,53 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: chore-app-rag
+  annotations:
+    run.googleapis.com/client-name: cloud-console
+spec:
+  template:
+    metadata:
+      annotations:
+        # Allocate more memory and CPU for LLM processing
+        run.googleapis.com/memory: "8Gi"
+        run.googleapis.com/cpu: "4"
+        # Increase timeout for model loading
+        run.googleapis.com/timeout: "3600"
+        # Allow concurrent requests
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      containerConcurrency: 10
+      timeoutSeconds: 3600
+      containers:
+      - image: gcr.io/YOUR_PROJECT_ID/chore-app-rag:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: OLLAMA_MODEL
+          value: "llama3.1:8b"
+        - name: INTERNAL_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: chore-app-secrets
+              key: internal-api-key
+        - name: ELEVENLABS_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: chore-app-secrets
+              key: elevenlabs-api-key
+        - name: BUCKET_NAME
+          value: "your-gcs-bucket"
+        - name: STORE_TO_GCS
+          value: "true"
+        - name: ADVICE_ENABLED
+          value: "true"
+        resources:
+          limits:
+            memory: "8Gi"
+            cpu: "4"
+          requests:
+            memory: "4Gi"
+            cpu: "2"
+  traffic:
+  - percent: 100
+    latestRevision: true

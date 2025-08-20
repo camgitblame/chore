@@ -12,6 +12,9 @@ export default function Home() {
   const [loadingSpeak, setLoadingSpeak] = useState(false);
   const [congratsPlaying, setCongratsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [advice, setAdvice] = useState<string | null>(null);
+  const [loadingAdvice, setLoadingAdvice] = useState(false);
+  const [showAdvice, setShowAdvice] = useState(false);
 
   // Default voice ID 
   const defaultVoiceId = "21m00Tcm4TlvDq8ikWAM"; 
@@ -24,7 +27,11 @@ export default function Home() {
 
   // Checklist state for selected chore
   const [checked, setChecked] = useState<boolean[]>([]);
-  useEffect(() => { setChecked(sel?.steps?.map(() => false) || []); }, [sel]);
+  useEffect(() => { 
+    setChecked(sel?.steps?.map(() => false) || []); 
+    setAdvice(null);
+    setShowAdvice(false);
+  }, [sel]);
 
   // Auto-speak chore when selected
   useEffect(() => {
@@ -88,6 +95,36 @@ export default function Home() {
     }
     setLoadingSpeak(false);
     setCongratsPlaying(false);
+  }
+
+  async function getAdvice() {
+    if (!sel || loadingAdvice) return;
+    setLoadingAdvice(true);
+    
+    try {
+      const response = await fetch("/api/advice-proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          chore_id: sel.id,
+          user_context: "" // Could be extended to include user preferences
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to get advice");
+      }
+      
+      const data = await response.json();
+      setAdvice(data.advice);
+      setShowAdvice(true);
+    } catch (error) {
+      console.error("Error getting advice:", error);
+      setAdvice("Sorry, I couldn't generate advice right now. Try breaking the task into smaller steps and remember that done is better than perfect!");
+      setShowAdvice(true);
+    } finally {
+      setLoadingAdvice(false);
+    }
   }
 
   // when all steps checked → auto congrats
@@ -251,6 +288,27 @@ export default function Home() {
                 >
                   {isMuted ? "◄◄" : "►►"} {isMuted ? "AUDIO OFF" : "AUDIO ON"}
                 </button>
+                
+                <button 
+                  className="flex items-center gap-2 px-4 py-2 rounded-none transition-all duration-200 border-2 font-mono tracking-wide bg-black border-purple-500 text-purple-400 hover:bg-purple-900 hover:bg-opacity-30 disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={getAdvice}
+                  disabled={loadingAdvice}
+                  style={{
+                    textShadow: '0 0 5px rgba(147, 51, 234, 0.5)',
+                    boxShadow: '0 0 10px rgba(147, 51, 234, 0.3)'
+                  }}
+                >
+                  {loadingAdvice ? (
+                    <>
+                      <div className="animate-spin text-lg">◆</div>
+                      ANALYZING...
+                    </>
+                  ) : (
+                    <>
+                      ★ GET ADVICE
+                    </>
+                  )}
+                </button>
               </div>
 
               <div className="space-y-3">
@@ -312,6 +370,39 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+
+              {/* Advice Panel */}
+              {showAdvice && advice && (
+                <div className="mt-6 bg-black border-4 border-purple-400 p-6 rounded-none" style={{
+                  boxShadow: '0 0 30px rgba(147, 51, 234, 0.4), inset 0 0 30px rgba(147, 51, 234, 0.1)'
+                }}>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-bold text-purple-400 font-mono tracking-widest" style={{
+                      textShadow: '0 0 10px rgba(147, 51, 234, 0.8)'
+                    }}>
+                      ▼ AI MISSION ADVISOR:
+                    </h3>
+                    <button 
+                      className="text-purple-400 hover:text-purple-300 transition-colors duration-200 font-mono text-lg"
+                      onClick={() => setShowAdvice(false)}
+                      style={{
+                        textShadow: '0 0 5px rgba(147, 51, 234, 0.5)'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="text-cyan-400 font-mono tracking-wide leading-relaxed" style={{
+                    textShadow: '0 0 5px rgba(34, 211, 238, 0.5)'
+                  }}>
+                    {advice.split('\n').map((line, i) => (
+                      <p key={i} className={line.startsWith('•') ? 'ml-2 mb-2' : 'mb-2'}>
+                        {line}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Hidden audio player for automatic playback */}
               {audioUrl && !isMuted && (

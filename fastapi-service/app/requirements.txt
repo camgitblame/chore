@@ -3,3 +3,8 @@ uvicorn[standard]
 requests
 google-cloud-storage
 pydantic
+langchain
+langchain-community
+chromadb
+sentence-transformers
+numpy
