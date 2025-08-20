@@ -45,9 +45,24 @@ echo "Building Docker image for linux/amd64..."
 docker buildx build --platform linux/amd64 -f Dockerfile.ollama -t $IMAGE_NAME . --push
 
 # Create secrets if they don't exist
-echo "Setting up secrets..."
+echo "🔐 Setting up secrets..."
 echo "dafd3a427c8ce3de0624ab7d72b45bac5c041e6a3810967a7cea017da7e071c2" | gcloud secrets create internal-api-key --data-file=- --quiet 2>/dev/null || echo "internal-api-key secret already exists"
 echo "sk_9eabcf21fe89240470d167aaedb421b54d4824959bf3c6f8" | gcloud secrets create elevenlabs-api-key --data-file=- --quiet 2>/dev/null || echo "elevenlabs-api-key secret already exists"
+
+# Grant Secret Manager access to the default compute service account
+echo "🔑 Setting up secret permissions..."
+PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
+SERVICE_ACCOUNT="$PROJECT_NUMBER-compute@developer.gserviceaccount.com"
+
+gcloud secrets add-iam-policy-binding internal-api-key \
+    --member="serviceAccount:$SERVICE_ACCOUNT" \
+    --role="roles/secretmanager.secretAccessor" \
+    --quiet
+
+gcloud secrets add-iam-policy-binding elevenlabs-api-key \
+    --member="serviceAccount:$SERVICE_ACCOUNT" \
+    --role="roles/secretmanager.secretAccessor" \
+    --quiet
 
 # Deploy to Cloud Run
 echo "Deploying to Cloud Run..."
@@ -62,6 +77,9 @@ gcloud run deploy $SERVICE_NAME \
   --min-instances 0 \
   --max-instances 2 \
   --allow-unauthenticated \
+  --port 8080 \
+  --cpu-boost \
+  --execution-environment gen2 \
   --set-env-vars="OLLAMA_BASE_URL=http://localhost:11434,OLLAMA_MODEL=llama3.2:1b,VECTOR_DB_PATH=/app/data/vector_store,ADVICE_ENABLED=true,STORE_TO_GCS=false,BUCKET_NAME=,CORS_ORIGIN=*" \
   --set-secrets="INTERNAL_API_KEY=internal-api-key:latest,ELEVENLABS_API_KEY=elevenlabs-api-key:latest"
 
