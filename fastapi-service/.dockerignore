@@ -1,0 +1,8 @@
+app/venv/
+app/__pycache__/
+app/**/__pycache__/
+app/*.pyc
+app/**/*.pyc
+app/.env
+.git/
+*.log
