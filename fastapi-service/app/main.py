@@ -21,12 +21,31 @@ BUCKET_NAME = os.getenv("BUCKET_NAME", "")
 STORE_TO_GCS = os.getenv("STORE_TO_GCS", "true").lower() == "true"
 CORS_ORIGIN = os.getenv("CORS_ORIGIN", "*")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[CORS_ORIGIN] if CORS_ORIGIN != "*" else ["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Configure CORS to allow Vercel domains and local development
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:3001", 
+    "https://choreapp.vercel.app",
+    "https://*.vercel.app"
+]
+
+# If CORS_ORIGIN is set to "*", allow all origins, otherwise use specific origins
+if CORS_ORIGIN == "*":
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["*"],
+    )
+else:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["*"],
+    )
 
 
 # --- models ---
