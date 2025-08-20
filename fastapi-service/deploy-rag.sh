@@ -3,7 +3,7 @@
 # Deployment script f# Build and push the Docker image
 echo "Building Docker image for linux/amd64..."
 docker build --platform linux/amd64 -f Dockerfile.ollama -t $IMAGE_NAME .Chore App with RAG integration on GCP
-# Usage: ./deploy-rag.sh
+
 
 PROJECT_ID="chore-469009"
 REGION="us-central1"
@@ -20,7 +20,7 @@ echo "Service: $SERVICE_NAME"
 gcloud config set project $PROJECT_ID
 
 # Enable required APIs
-echo "🔧 Enabling required APIs..."
+echo "Enabling required APIs..."
 gcloud services enable secretmanager.googleapis.com --quiet
 gcloud services enable run.googleapis.com --quiet
 gcloud services enable artifactregistry.googleapis.com --quiet
@@ -45,12 +45,12 @@ echo "Building Docker image for linux/amd64..."
 docker buildx build --platform linux/amd64 -f Dockerfile.ollama -t $IMAGE_NAME . --push
 
 # Create secrets if they don't exist
-echo "🔐 Setting up secrets..."
+echo "Setting up secrets..."
 echo "dafd3a427c8ce3de0624ab7d72b45bac5c041e6a3810967a7cea017da7e071c2" | gcloud secrets create internal-api-key --data-file=- --quiet 2>/dev/null || echo "internal-api-key secret already exists"
 echo "sk_9eabcf21fe89240470d167aaedb421b54d4824959bf3c6f8" | gcloud secrets create elevenlabs-api-key --data-file=- --quiet 2>/dev/null || echo "elevenlabs-api-key secret already exists"
 
 # Grant Secret Manager access to the default compute service account
-echo "🔑 Setting up secret permissions..."
+echo "Setting up secret permissions..."
 PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
 SERVICE_ACCOUNT="$PROJECT_NUMBER-compute@developer.gserviceaccount.com"
 
