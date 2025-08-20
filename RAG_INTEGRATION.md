@@ -4,7 +4,7 @@ This guide explains how to integrate and deploy the LangChain + RAG + Ollama fea
 
 ## Overview
 
-The RAG (Retrieval-Augmented Generation) integration adds intelligent advice generation to your chore app using:
+The RAG (Retrieval-Augmented Generation) integration adds intelligent advice generation to the chore app using:
 
 - **Ollama**: Local LLM hosting (llama3.1:8b model)
 - **LangChain**: RAG orchestration framework
@@ -192,24 +192,6 @@ The "Get Advice" button appears next to the audio controls with matching retro s
 - Consider Cloud SQL for vector storage in production
 - Implement request caching for frequent queries
 
-## Troubleshooting
-
-### Common Issues
-
-1. **"Ollama not available"**:
-   - Check if Ollama service is running
-   - Verify `OLLAMA_BASE_URL` environment variable
-   - Ensure model is downloaded: `ollama list`
-
-2. **"Vector store not available"**:
-   - Check ChromaDB installation: `pip install chromadb`
-   - Verify write permissions to `VECTOR_DB_PATH`
-   - Check knowledge base file exists
-
-3. **Cloud Run deployment fails**:
-   - Increase memory allocation (minimum 8GB)
-   - Check timeout settings (model loading takes time)
-   - Verify secrets are properly configured
 
 ### Debug Commands
 
@@ -223,42 +205,3 @@ curl -X POST http://localhost:8000/advice/status
 # Check vector store
 python -c "from rag.vector_store import VectorStore; vs = VectorStore(); print(vs.get_collection_count())"
 ```
-
-## Security Notes
-
-- **API Keys**: Store in Google Secret Manager, not in code
-- **Internal API**: Use strong random keys for backend communication
-- **Model Access**: Consider rate limiting for production deployments
-- **Data Privacy**: Chore data and advice requests are processed locally
-
-## Cost Considerations
-
-### Development
-- Local development is free (runs on your machine)
-- Ollama models are open source and free to use
-
-### Production (GCP)
-- **Cloud Run**: ~$50-100/month for 8GB, 4 CPU instance
-- **Storage**: ~$5/month for model files and vector database
-- **Networking**: Minimal costs for API calls
-
-### Cost Optimization
-- Use Cloud Run's scaling to zero for low traffic
-- Consider preemptible instances for batch processing
-- Cache frequent advice requests to reduce compute
-
-## Future Enhancements
-
-1. **Personalization**: Learn from user feedback and preferences
-2. **Multi-modal**: Add image analysis for visual chore guidance
-3. **Voice Integration**: Combine with existing TTS for spoken advice
-4. **Analytics**: Track which advice is most helpful
-5. **Collaborative Filtering**: Share anonymized tips between users
-
-## Support
-
-For issues or questions:
-1. Check the troubleshooting section above
-2. Review the [Ollama documentation](https://ollama.ai/docs)
-3. Check [LangChain documentation](https://python.langchain.com/)
-4. Open an issue in the project repository
