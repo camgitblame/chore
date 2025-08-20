@@ -4,6 +4,7 @@ FROM python:3.11-slim
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Ollama
@@ -25,32 +26,41 @@ RUN mkdir -p /app/data/vector_store
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV OLLAMA_HOST=0.0.0.0:11434
+ENV OLLAMA_MODELS=/app/models
 
 # Expose ports
 EXPOSE 8000 11434
 
 # Create startup script
 RUN echo '#!/bin/bash\n\
-# Start Ollama in the background\n\
+set -e\n\
+echo "Starting Ollama service..."\n\
 ollama serve &\n\
 OLLAMA_PID=$!\n\
 \n\
 # Wait for Ollama to be ready\n\
 echo "Waiting for Ollama to start..."\n\
-until curl -s http://localhost:11434/api/tags > /dev/null; do\n\
-    sleep 1\n\
+until curl -s http://localhost:11434/api/tags > /dev/null 2>&1; do\n\
+    echo "Still waiting for Ollama..."\n\
+    sleep 2\n\
 done\n\
-echo "Ollama is ready!"\n\
+echo "✅ Ollama is ready!"\n\
 \n\
-# Pull the default model if specified\n\
+# Pull the model if specified\n\
 if [ -n "$OLLAMA_MODEL" ]; then\n\
-    echo "Pulling model: $OLLAMA_MODEL"\n\
+    echo "📦 Pulling model: $OLLAMA_MODEL"\n\
     ollama pull $OLLAMA_MODEL\n\
+    echo "✅ Model ready!"\n\
 fi\n\
 \n\
 # Start FastAPI application\n\
-exec uvicorn main:app --host 0.0.0.0 --port 8000' > /app/start.sh
+echo "🚀 Starting FastAPI application..."\n\
+exec uvicorn main:app --host 0.0.0.0 --port 8000 --workers 1' > /app/start.sh
 
 RUN chmod +x /app/start.sh
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5m --retries=3 \
+    CMD curl -f http://localhost:8000/advice/status || exit 1
 
 CMD ["/app/start.sh"]

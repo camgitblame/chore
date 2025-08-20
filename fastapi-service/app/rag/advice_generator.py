@@ -44,13 +44,17 @@ class AdviceGenerator:
         # Generate advice using Ollama
         system_prompt = """You are a helpful assistant specializing in household chores and organization. 
         You provide practical, actionable advice for people who may have ADHD or autism spectrum conditions.
-        Keep your advice concise, encouraging, and easy to follow. Focus on helpful tips and modifications."""
+        Keep your advice concise, encouraging, and easy to follow. Focus on helpful tips and modifications.
         
+        IMPORTANT: Do not use any markdown formatting like **bold**, *italic*, or other special characters.
+        Use plain text only. Format lists with simple bullet points (•) or numbers."""
+
         prompt = f"""Based on the chore information and relevant tips below, provide helpful advice for completing this chore:
 
 {context}
 
-Provide 2-3 practical tips that would be most helpful for this specific chore. Keep your response concise and encouraging."""
+Provide 2-3 practical tips that would be most helpful for this specific chore. Keep your response concise and encouraging.
+Use bullet points (•) for lists, not markdown formatting."""
 
         advice = self.ollama_client.generate(prompt, system_prompt)
         

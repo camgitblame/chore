@@ -380,7 +380,7 @@ export default function Home() {
                     <h3 className="text-xl font-bold text-purple-400 font-mono tracking-widest" style={{
                       textShadow: '0 0 10px rgba(147, 51, 234, 0.8)'
                     }}>
-                      ▼ AI MISSION ADVISOR:
+                      ▼ MISSION ADVISOR:
                     </h3>
                     <button 
                       className="text-purple-400 hover:text-purple-300 transition-colors duration-200 font-mono text-lg"
