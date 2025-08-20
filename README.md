@@ -124,8 +124,8 @@ OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2:1b
 VECTOR_DB_PATH=./data/vector_store
 ADVICE_ENABLED=true
-ELEVENLABS_API_KEY=elevenlabs_key
-INTERNAL_API_KEY=api_internal_key
+ELEVENLABS_API_KEY=elevenlabs_api_key
+INTERNAL_API_KEY=internal_api_key
 ```
 
 4. **Run the backend**:
@@ -139,8 +139,6 @@ python -m uvicorn main:app --reload
 # In chore/.env.local
 NEXT_PUBLIC_API_BASE=http://localhost:8000
 ```
-
-For detailed RAG setup instructions, see `RAG_INTEGRATION.md`.
 
 ## Deployment
 
