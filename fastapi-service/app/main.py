@@ -47,8 +47,22 @@ class AdviceRequest(BaseModel):
 
 def require_api_key(x_api_key: str = Header(default=None)):
     # Require a shared secret header from Next.js server route
-    if INTERNAL_API_KEY and x_api_key != INTERNAL_API_KEY:
+    # Strip whitespace from both keys to handle any secret formatting issues
+    received_key = x_api_key.strip() if x_api_key else None
+    expected_key = INTERNAL_API_KEY.strip() if INTERNAL_API_KEY else None
+    
+    if expected_key and received_key != expected_key:
         raise HTTPException(401, "Unauthorized")
+    return True
+
+
+@app.get("/debug/env")
+async def debug_env():
+    return {
+        "has_internal_api_key": bool(INTERNAL_API_KEY),
+        "internal_api_key_length": len(INTERNAL_API_KEY) if INTERNAL_API_KEY else 0,
+        "has_eleven_key": bool(ELEVEN_KEY)
+    }
     return True
 
 
