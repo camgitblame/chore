@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// RAG-enabled advice proxy for production deployment
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
