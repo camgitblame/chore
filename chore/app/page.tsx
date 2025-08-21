@@ -7,6 +7,7 @@ export default function Home() {
   const [q, setQ] = useState("");
   const [chores, setChores] = useState<Chore[]>([]);
   const [sel, setSel] = useState<Chore | null>(null);
+  const [loadingChores, setLoadingChores] = useState(false);
 
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [loadingSpeak, setLoadingSpeak] = useState(false);
@@ -21,8 +22,30 @@ export default function Home() {
 
   // Load chores from FastAPI
   useEffect(() => {
-    const url = `${process.env.NEXT_PUBLIC_API_BASE}/chores?q=${encodeURIComponent(q)}`;
-    fetch(url).then(r => r.json()).then(d => setChores(d.chores || []));
+    const fetchChores = async () => {
+      if (!q.trim()) {
+        setChores([]);
+        setLoadingChores(false);
+        return;
+      }
+      
+      setLoadingChores(true);
+      try {
+        const url = `${process.env.NEXT_PUBLIC_API_BASE}/chores?q=${encodeURIComponent(q)}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        setChores(data.chores || []);
+      } catch (error) {
+        console.error('Error fetching chores:', error);
+        setChores([]);
+      } finally {
+        setLoadingChores(false);
+      }
+    };
+
+    // Add a small delay to avoid too many requests while typing
+    const timeoutId = setTimeout(fetchChores, 300);
+    return () => clearTimeout(timeoutId);
   }, [q]);
 
   // Checklist state for selected chore
@@ -185,27 +208,57 @@ export default function Home() {
             </div>
             {q && (
               <div className="mt-6 space-y-3">
-                {chores.map(c => (
-                  <div key={c.id} className="bg-black border-2 border-yellow-400 hover:border-cyan-400 transition-all duration-200 rounded-none" style={{
-                    boxShadow: '0 0 10px rgba(251, 191, 36, 0.3)'
+                {loadingChores ? (
+                  <div className="bg-black border-2 border-cyan-400 p-6 rounded-none animate-pulse" style={{
+                    boxShadow: '0 0 15px rgba(34, 211, 238, 0.4)'
                   }}>
-                    <button 
-                      className="w-full p-4 text-left hover:bg-gray-900 hover:bg-opacity-50 transition-all duration-200 font-mono"
-                      onClick={() => setSel(c)}
-                      style={{
-                        textShadow: '0 0 5px rgba(34, 211, 238, 0.5)'
-                      }}
-                    >
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="text-lg font-bold text-yellow-400 tracking-wide">▶ {c.title.toUpperCase()}</h3>
-                          <p className="text-green-400 text-sm mt-1 tracking-wide">DURATION: ~{c.time_min} MIN</p>
-                        </div>
-                        <div className="text-cyan-400 text-xl animate-pulse">►</div>
+                    <div className="flex items-center gap-3 font-mono tracking-wide">
+                      <div className="animate-spin text-xl text-cyan-400">◆</div>
+                      <div className="text-cyan-400">
+                        SCANNING MISSION DATABASE...
                       </div>
-                    </button>
+                    </div>
+                    <div className="mt-3 space-y-2">
+                      <div className="h-4 bg-gray-700 rounded animate-pulse"></div>
+                      <div className="h-4 bg-gray-700 rounded animate-pulse w-3/4"></div>
+                      <div className="h-4 bg-gray-700 rounded animate-pulse w-1/2"></div>
+                    </div>
                   </div>
-                ))}
+                ) : chores.length > 0 ? (
+                  chores.map(c => (
+                    <div key={c.id} className="bg-black border-2 border-yellow-400 hover:border-cyan-400 transition-all duration-200 rounded-none" style={{
+                      boxShadow: '0 0 10px rgba(251, 191, 36, 0.3)'
+                    }}>
+                      <button 
+                        className="w-full p-4 text-left hover:bg-gray-900 hover:bg-opacity-50 transition-all duration-200 font-mono"
+                        onClick={() => setSel(c)}
+                        style={{
+                          textShadow: '0 0 5px rgba(34, 211, 238, 0.5)'
+                        }}
+                      >
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <h3 className="text-lg font-bold text-yellow-400 tracking-wide">▶ {c.title.toUpperCase()}</h3>
+                            <p className="text-green-400 text-sm mt-1 tracking-wide">DURATION: ~{c.time_min} MIN</p>
+                          </div>
+                          <div className="text-cyan-400 text-xl animate-pulse">►</div>
+                        </div>
+                      </button>
+                    </div>
+                  ))
+                ) : q.trim() && (
+                  <div className="bg-black border-2 border-red-500 p-6 rounded-none" style={{
+                    boxShadow: '0 0 15px rgba(239, 68, 68, 0.4)'
+                  }}>
+                    <div className="text-red-400 font-mono tracking-wide text-center">
+                      <div className="text-xl mb-2">⚠</div>
+                      NO MISSIONS FOUND FOR "{q.toUpperCase()}"
+                      <div className="text-sm mt-2 text-gray-400">
+                        Try keywords like: kitchen, bathroom, laundry, desk
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
