@@ -506,7 +506,17 @@ export default function Home() {
         <p className="text-gray-500 text-sm font-mono tracking-widest" style={{
           textShadow: '0 0 3px rgba(107, 114, 128, 0.5)'
         }}>
-          ▓ Developed by Cam Nguyen © 2025 ▓
+          ▓ Developed by{' '}
+          <button
+            onClick={() => window.open('https://camgitblame.netlify.app/', '_blank')}
+            className="text-cyan-400 hover:text-cyan-300 transition-colors duration-200 cursor-pointer underline decoration-dotted hover:decoration-solid"
+            style={{
+              textShadow: '0 0 5px rgba(34, 211, 238, 0.5)'
+            }}
+          >
+            Cam Nguyen
+          </button>
+          {' '}© 2025 ▓
         </p>
       </footer>
     </div>
