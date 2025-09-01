@@ -24,9 +24,9 @@ CORS_ORIGIN = os.getenv("CORS_ORIGIN", "*")
 # Configure CORS to allow Vercel domains and local development
 allowed_origins = [
     "http://localhost:3000",
-    "http://localhost:3001", 
+    "http://localhost:3001",
     "https://choreapp.vercel.app",
-    "https://*.vercel.app"
+    "https://*.vercel.app",
 ]
 
 # If CORS_ORIGIN is set to "*", allow all origins, otherwise use specific origins
@@ -69,7 +69,7 @@ def require_api_key(x_api_key: str = Header(default=None)):
     # Strip whitespace from both keys to handle any secret formatting issues
     received_key = x_api_key.strip() if x_api_key else None
     expected_key = INTERNAL_API_KEY.strip() if INTERNAL_API_KEY else None
-    
+
     if expected_key and received_key != expected_key:
         raise HTTPException(401, "Unauthorized")
     return True
@@ -80,7 +80,7 @@ async def debug_env():
     return {
         "has_internal_api_key": bool(INTERNAL_API_KEY),
         "internal_api_key_length": len(INTERNAL_API_KEY) if INTERNAL_API_KEY else 0,
-        "has_eleven_key": bool(ELEVEN_KEY)
+        "has_eleven_key": bool(ELEVEN_KEY),
     }
     return True
 
@@ -111,12 +111,12 @@ def upload_to_gcs_and_sign(data: bytes, content_type: str = "audio/mpeg") -> str
 def eleven_tts(text: str, voice_id: str, stability: float, similarity: float) -> bytes:
     if not ELEVEN_KEY:
         raise HTTPException(500, "Missing ELEVENLABS_API_KEY")
-    
+
     # Strip whitespace from API key to handle any secret formatting issues
     api_key = ELEVEN_KEY.strip() if ELEVEN_KEY else ""
     if not api_key:
         raise HTTPException(500, "Invalid ELEVENLABS_API_KEY")
-    
+
     r = requests.post(
         f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
         headers={
@@ -188,13 +188,13 @@ def get_advice(payload: AdviceRequest, _=Depends(require_api_key)):
     chore = get_chore_by_id(payload.chore_id)
     if not chore:
         raise HTTPException(404, "Chore not found")
-    
+
     advice = advice_generator.get_chore_advice(chore, payload.user_context)
-    
+
     return {
         "advice": advice,
         "chore_id": payload.chore_id,
-        "rag_available": advice_generator.is_available()
+        "rag_available": advice_generator.is_available(),
     }
 
 
@@ -205,5 +205,5 @@ def advice_status():
         "advice_available": advice_generator.is_available(),
         "ollama_available": advice_generator.ollama_client.is_available(),
         "vector_store_available": advice_generator.vector_store.is_available(),
-        "knowledge_count": advice_generator.vector_store.get_collection_count()
+        "knowledge_count": advice_generator.vector_store.get_collection_count(),
     }

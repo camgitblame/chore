@@ -5,9 +5,10 @@ type Chore = { id:string; title:string; items:string[]; steps:string[]; time_min
 
 export default function Home() {
   const [q, setQ] = useState("");
-  const [chores, setChores] = useState<Chore[]>([]);
+  const [allChores, setAllChores] = useState<Chore[]>([]);
+  const [filteredChores, setFilteredChores] = useState<Chore[]>([]);
   const [sel, setSel] = useState<Chore | null>(null);
-  const [loadingChores, setLoadingChores] = useState(false);
+  const [loadingChores, setLoadingChores] = useState(true);
 
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [loadingSpeak, setLoadingSpeak] = useState(false);
@@ -20,33 +21,43 @@ export default function Home() {
   // Default voice ID 
   const defaultVoiceId = "21m00Tcm4TlvDq8ikWAM"; 
 
-  // Load chores from FastAPI
+  // Preload all chores on app start
   useEffect(() => {
-    const fetchChores = async () => {
-      if (!q.trim()) {
-        setChores([]);
-        setLoadingChores(false);
-        return;
-      }
-      
+    const fetchAllChores = async () => {
       setLoadingChores(true);
       try {
-        const url = `${process.env.NEXT_PUBLIC_API_BASE}/chores?q=${encodeURIComponent(q)}`;
+        const url = `${process.env.NEXT_PUBLIC_API_BASE}/chores`;
         const response = await fetch(url);
         const data = await response.json();
-        setChores(data.chores || []);
+        setAllChores(data.chores || []);
       } catch (error) {
         console.error('Error fetching chores:', error);
-        setChores([]);
+        setAllChores([]);
       } finally {
         setLoadingChores(false);
       }
     };
 
-    // Add a small delay to avoid too many requests while typing
-    const timeoutId = setTimeout(fetchChores, 300);
-    return () => clearTimeout(timeoutId);
-  }, [q]);
+    fetchAllChores();
+  }, []);
+
+  // Client-side filtering for instant results
+  useEffect(() => {
+    if (!q.trim()) {
+      setFilteredChores([]);
+      return;
+    }
+
+    const query = q.toLowerCase();
+    const filtered = allChores.filter(chore => 
+      chore.title.toLowerCase().includes(query) ||
+      chore.id.toLowerCase().includes(query) ||
+      chore.items.some(item => item.toLowerCase().includes(query)) ||
+      chore.steps.some(step => step.toLowerCase().includes(query))
+    );
+    
+    setFilteredChores(filtered);
+  }, [q, allChores]);
 
   // Checklist state for selected chore
   const [checked, setChecked] = useState<boolean[]>([]);
@@ -163,14 +174,25 @@ export default function Home() {
   }, [checked.join("|")]); // watch changes compactly
 
   return (
-    <div className="min-h-screen bg-black text-cyan-400 flex flex-col" style={{
-      backgroundImage: `
-        radial-gradient(circle at 25% 25%, #1a0033 0%, transparent 50%),
-        radial-gradient(circle at 75% 75%, #001a33 0%, transparent 50%),
-        linear-gradient(135deg, #000000 0%, #0a0a0a 100%)
-      `
-    }}>
-      <main className="flex-1">
+    <div className="min-h-screen bg-black text-cyan-400 relative">
+      {/* Loading overlay for initial chore database load */}
+      {loadingChores && allChores.length === 0 && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
+          <div className="text-center">
+            <div className="animate-spin text-6xl text-cyan-400 mb-4">◆</div>
+            <div className="text-xl font-mono tracking-widest text-cyan-400" style={{
+              textShadow: '0 0 10px rgba(34, 211, 238, 0.8)'
+            }}>
+              INITIALIZING MISSION DATABASE...
+            </div>
+            <div className="mt-4 text-sm text-gray-400 font-mono">
+              Loading chore protocols...
+            </div>
+          </div>
+        </div>
+      )}
+
+      <main className="container mx-auto p-6 max-w-2xl">{/* ...existing code... */}
         <div className="p-6 max-w-4xl mx-auto">
         <div className="text-center mb-12 border-4 border-cyan-400 bg-black bg-opacity-80 p-8 rounded-none shadow-lg shadow-cyan-400/20" style={{
           boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), inset 0 0 20px rgba(34, 211, 238, 0.1)'
@@ -215,7 +237,7 @@ export default function Home() {
                     <div className="flex items-center gap-3 font-mono tracking-wide">
                       <div className="animate-spin text-xl text-cyan-400">◆</div>
                       <div className="text-cyan-400">
-                        SCANNING MISSION DATABASE...
+                        LOADING MISSION DATABASE...
                       </div>
                     </div>
                     <div className="mt-3 space-y-2">
@@ -224,8 +246,8 @@ export default function Home() {
                       <div className="h-4 bg-gray-700 rounded animate-pulse w-1/2"></div>
                     </div>
                   </div>
-                ) : chores.length > 0 ? (
-                  chores.map(c => (
+                ) : filteredChores.length > 0 ? (
+                  filteredChores.map(c => (
                     <div key={c.id} className="bg-black border-2 border-yellow-400 hover:border-cyan-400 transition-all duration-200 rounded-none" style={{
                       boxShadow: '0 0 10px rgba(251, 191, 36, 0.3)'
                     }}>
@@ -246,7 +268,7 @@ export default function Home() {
                       </button>
                     </div>
                   ))
-                ) : q.trim() && (
+                ) : q.trim() && !loadingChores && (
                   <div className="bg-black border-2 border-red-500 p-6 rounded-none" style={{
                     boxShadow: '0 0 15px rgba(239, 68, 68, 0.4)'
                   }}>
