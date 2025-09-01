@@ -141,7 +141,7 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           chore_id: sel.id,
-          user_context: "" // Could be extended to include user preferences
+          user_context: "" 
         })
       });
       
@@ -165,9 +165,9 @@ export default function Home() {
   useEffect(() => {
     if (!sel || !checked.length) return;
     const all = checked.every(Boolean);
-    console.log('Checked status:', checked, 'All done?', all); // Debug log
+    console.log('Checked status:', checked, 'All done?', all); 
     if (all) {
-      console.log('All steps completed! Playing congrats...'); // Debug log
+      console.log('All steps completed! Playing congrats...'); 
       speakCongrats();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -175,24 +175,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-cyan-400 relative">
-      {/* Loading overlay for initial chore database load */}
-      {loadingChores && allChores.length === 0 && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50">
-          <div className="text-center">
-            <div className="animate-spin text-6xl text-cyan-400 mb-4">◆</div>
-            <div className="text-xl font-mono tracking-widest text-cyan-400" style={{
-              textShadow: '0 0 10px rgba(34, 211, 238, 0.8)'
-            }}>
-              INITIALIZING MISSION DATABASE...
-            </div>
-            <div className="mt-4 text-sm text-gray-400 font-mono">
-              Loading chore protocols...
-            </div>
-          </div>
-        </div>
-      )}
-
-      <main className="container mx-auto p-6 max-w-2xl">{/* ...existing code... */}
+      <main className="container mx-auto p-6 max-w-2xl">{}
         <div className="p-6 max-w-4xl mx-auto">
         <div className="text-center mb-12 border-4 border-cyan-400 bg-black bg-opacity-80 p-8 rounded-none shadow-lg shadow-cyan-400/20" style={{
           boxShadow: '0 0 20px rgba(34, 211, 238, 0.3), inset 0 0 20px rgba(34, 211, 238, 0.1)'
@@ -211,6 +194,23 @@ export default function Home() {
           </p>
         </div>
 
+        {/* Loading state for chore database load */}
+        {loadingChores && allChores.length === 0 && (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="animate-spin text-6xl text-cyan-400 mb-4">◆</div>
+              <div className="text-xl font-mono tracking-widest text-cyan-400" style={{
+                textShadow: '0 0 10px rgba(34, 211, 238, 0.8)'
+              }}>
+                INITIALIZING MISSION DATABASE...
+              </div>
+              <div className="mt-4 text-sm text-gray-400 font-mono">
+                Loading chore protocols...
+              </div>
+            </div>
+          </div>
+        )}
+
         {!sel && (
           <div className="max-w-xl mx-auto">
             <div className="relative">
@@ -219,6 +219,7 @@ export default function Home() {
                 onChange={e => setQ(e.target.value)}
                 placeholder="SEARCH MISSIONS... [TYPE HERE]"
                 className="w-full p-4 text-lg bg-black border-2 border-magenta-500 text-cyan-400 placeholder-magenta-400 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 rounded-none font-mono tracking-wide"
+                disabled={loadingChores && allChores.length === 0}
                 style={{
                   boxShadow: 'inset 0 0 10px rgba(139, 69, 19, 0.3)',
                   textShadow: '0 0 5px rgba(34, 211, 238, 0.5)'
@@ -228,25 +229,9 @@ export default function Home() {
                 ◆
               </div>
             </div>
-            {q && (
+            {q && !loadingChores && (
               <div className="mt-6 space-y-3">
-                {loadingChores ? (
-                  <div className="bg-black border-2 border-cyan-400 p-6 rounded-none animate-pulse" style={{
-                    boxShadow: '0 0 15px rgba(34, 211, 238, 0.4)'
-                  }}>
-                    <div className="flex items-center gap-3 font-mono tracking-wide">
-                      <div className="animate-spin text-xl text-cyan-400">◆</div>
-                      <div className="text-cyan-400">
-                        LOADING MISSION DATABASE...
-                      </div>
-                    </div>
-                    <div className="mt-3 space-y-2">
-                      <div className="h-4 bg-gray-700 rounded animate-pulse"></div>
-                      <div className="h-4 bg-gray-700 rounded animate-pulse w-3/4"></div>
-                      <div className="h-4 bg-gray-700 rounded animate-pulse w-1/2"></div>
-                    </div>
-                  </div>
-                ) : filteredChores.length > 0 ? (
+                {filteredChores.length > 0 ? (
                   filteredChores.map(c => (
                     <div key={c.id} className="bg-black border-2 border-yellow-400 hover:border-cyan-400 transition-all duration-200 rounded-none" style={{
                       boxShadow: '0 0 10px rgba(251, 191, 36, 0.3)'
@@ -268,7 +253,7 @@ export default function Home() {
                       </button>
                     </div>
                   ))
-                ) : q.trim() && !loadingChores && (
+                ) : (
                   <div className="bg-black border-2 border-red-500 p-6 rounded-none" style={{
                     boxShadow: '0 0 15px rgba(239, 68, 68, 0.4)'
                   }}>
