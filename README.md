@@ -5,8 +5,8 @@ A Next.js web app that makes household chores easier with AI-powered advice, aud
 ## Features
 - **Chore search**: Browse and select from a curated list of common household tasks
 - **Voice guidance**: Clear spoken instructions with ElevenLabs, auto-play on selection, mute control
-- **Step tracking**: Check off steps and get a friendly completion cue
-- **AI-Powered Advice**: Get contextual, personalized tips fo each chore using RAG with Ollama
+- **Step tracking**: Check off steps and get a congratulation message
+- **AI-Powered Advice**: Get tips fo each chore using RAG with Ollama
 - **Retro UI**: Neon-accented, dark theme in arcade style with fast chore search on desktop and mobile
 
 ## Tech Stack
@@ -17,12 +17,12 @@ A Next.js web app that makes household chores easier with AI-powered advice, aud
 - **Deployment**: Vercel
 
 ### Backend & AI
-- **API**: FastAPI (deployed on Google Cloud Run)
+- **API**: FastAPI (deployed on GCR)
 - **Database**: SQLite with chore data
-- **AI Model**: Ollama (llama3.2:1b) for advice generation
-- **RAG Framework**: LangChain for retrieval-augmented generation
+- **AI Model**: Ollama (llama3.2:1b) for generating advice 
+- **RAG Framework**: LangChain for RAG
 - **Vector Database**: ChromaDB for semantic search
-- **Knowledge Base**: 56 curated chore tips across 8 categories
+- **Knowledge Base**: 56 tips for chore across 8 categories
 - **Voice AI**: ElevenLabs API for text-to-speech
 
 ### Infrastructure
@@ -174,5 +174,5 @@ The RAG system provides:
 
 ---
 
-Built with ❤️ for the neurodivergent community by [Cam Nguyen](https://github.com/camgitblame)
+Built with 💛 for the neurodivergent community by [Cam Nguyen](https://github.com/camgitblame)
 
