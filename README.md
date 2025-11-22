@@ -167,8 +167,8 @@ The RAG system provides:
 
 - **Contextual Tips**: Specific advice for each chore type (kitchen, bathroom, organization, etc.)
 - **Personalized Recommendations**: Considers user context like ADHD, autism, energy levels, motivation
-- **Knowledge Base**: 56 curated tips from cleaning experts and accessibility specialists
-- **Smart Search**: Lightweight keyword-based search finds most relevant advice without heavy embeddings
+- **Knowledge Base**: Curated tips from cleaning experts and accessibility specialists
+
 
 ---
 
