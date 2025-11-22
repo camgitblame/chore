@@ -9,6 +9,7 @@ DATABASE_PATH = os.path.join(os.path.dirname(__file__), "chores.db")
 # Connection pool to reuse database connections
 _db_connection = None
 
+
 def get_db_connection():
     """Get a reusable database connection."""
     global _db_connection
@@ -110,6 +111,7 @@ def get_all_chores_cached() -> tuple:
         chores.append(chore)
 
     return tuple(json.dumps(c) for c in chores)
+
 
 def get_all_chores() -> List[Dict]:
     """Get all chores from the database with caching."""

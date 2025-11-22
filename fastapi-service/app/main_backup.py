@@ -121,6 +121,7 @@ async def edge_tts_generate(text: str, voice: str = "en-US-AriaNeural") -> bytes
     """Generate TTS using Microsoft Edge TTS (completely free, no API key needed)"""
     import edge_tts
     import tempfile
+    import asyncio
     
     # Available voices:
     # en-US-AriaNeural (Female, friendly)
@@ -143,6 +144,7 @@ async def edge_tts_generate(text: str, voice: str = "en-US-AriaNeural") -> bytes
             audio_data = f.read()
         
         # Clean up
+        import os
         os.unlink(tmp_path)
         
         return audio_data
@@ -175,21 +177,12 @@ def get_chore(chore_id: str):
 
 
 @app.post("/tts")
-async def tts(payload: TTSIn, _=Depends(require_api_key)):
-    # Map voice_id to Edge TTS voices (maintain compatibility with frontend)
-    voice_map = {
-        "21m00Tcm4TlvDq8ikWAM": "en-US-AriaNeural",  # Default ElevenLabs voice -> Aria
-        "default": "en-US-AriaNeural",
-        "male": "en-US-GuyNeural",
-        "female": "en-US-JennyNeural",
-        "british": "en-GB-SoniaNeural",
-    }
-    
-    voice = voice_map.get(payload.voice_id, "en-US-AriaNeural")
-    
-    # If caller passed text, speak it directly (used for "congrats")
+def tts(payload: TTSIn, _=Depends(require_api_key)):
+    # If caller passed text, speak it directly (used for “congrats”)
     if payload.text:
-        audio = await edge_tts_generate(payload.text, voice)
+        audio = eleven_tts(
+            payload.text, payload.voice_id, payload.stability, payload.similarity
+        )
     else:
         # Else read a chore by id
         if not payload.chore_id:
@@ -198,7 +191,9 @@ async def tts(payload: TTSIn, _=Depends(require_api_key)):
         if not chore:
             raise HTTPException(404, "Chore not found")
         script = chore_script(chore)
-        audio = await edge_tts_generate(script, voice)
+        audio = eleven_tts(
+            script, payload.voice_id, payload.stability, payload.similarity
+        )
 
     if STORE_TO_GCS:
         if not BUCKET_NAME:
