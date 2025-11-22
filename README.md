@@ -20,7 +20,7 @@ A Next.js web app that makes household chores easier with AI-powered advice, aud
 - **API**: FastAPI (deployed on Google Cloud Run)
 - **Database**: SQLite
 - **AI Model**: Groq (llama-3.1-8b-instant)
-- **Knowledge Base**: 56 curated tips across 8 categories (kitchen, bathroom, organization, etc.)
+- **Knowledge Base**: Curated tips across 8 categories (kitchen, bathroom, organization, etc.)
 - **Voice AI**: gTTS (Google Text-to-Speech) 
 
 ### Infrastructure
@@ -44,14 +44,14 @@ chore_app/
 ├── fastapi-service/          # Python backend service
 │   ├── app/                  # FastAPI application
 │   │   ├── rag/              # Knowledge base
-│   │   │   └── knowledge_base.json    # 56 curated chore tips
-│   │   ├── groq_rag.py       # Lightweight RAG with Groq API
+│   │   │   └── knowledge_base.json    # Curated chore tips
+│   │   ├── groq_rag.py       # RAG with Groq API
 │   │   ├── database.py       # SQLite chore database
 │   │   ├── main.py           # FastAPI app with TTS and advice endpoints
-│   │   ├── requirements-simple.txt    # Minimal dependencies
-│   │   └── .env              # Environment variables (API keys)
+│   │   ├── requirements-simple.txt    # Dependencies
+│   │   └── .env              # Environment variables 
 │   ├── Dockerfile.simple     # Lightweight production container
-│   └── chores.db             # SQLite database with 15 chores
+│   └── chores.db             # SQLite database 
 └── README.md                 
 ```
 
