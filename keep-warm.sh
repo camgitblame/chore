@@ -1,11 +1,8 @@
 #!/bin/bash
-# Keep the Cloud Run service warm by pinging it every 4 minutes
-# Run this script in the background or as a cron job
+# Keep the Cloud Run service warm by pinging every 4 minutes
 
 API_URL="https://chore-api-rag-611389647575.us-central1.run.app"
 
-echo "Starting keep-warm script for $API_URL"
-echo "Press Ctrl+C to stop"
 
 while true; do
     echo "[$(date)] Pinging health endpoint..."
@@ -17,6 +14,6 @@ while true; do
         echo "[$(date)] ✗ Ping failed"
     fi
     
-    # Wait 4 minutes (Cloud Run keeps instances alive for 5 minutes)
+    # Wait 4 minutes 
     sleep 240
 done
