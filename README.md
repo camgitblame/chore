@@ -17,9 +17,9 @@ A Next.js web app that makes household chores easier with AI-powered advice, aud
 - **Deployment**: Vercel
 
 ### Backend & AI
-- **API**: FastAPI (deployed on Google Cloud Run)
+- **API**: FastAPI, Groq API
 - **Database**: SQLite
-- **AI Model**: Groq (llama-3.1-8b-instant)
+- **AI Model**: Llama (llama-3.1-8b-instant via Groq)
 - **Knowledge Base**: Curated tips across 8 categories (kitchen, bathroom, organization, etc.)
 - **Voice AI**: gTTS (Google Text-to-Speech) 
 
