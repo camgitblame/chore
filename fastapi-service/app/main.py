@@ -75,6 +75,15 @@ def require_api_key(x_api_key: str = Header(default=None)):
     return True
 
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint to keep Cloud Run warm"""
+    return {
+        "status": "healthy",
+        "service": "chore-api",
+        "chores_available": len(get_all_chores())
+    }
+
 @app.get("/debug/env")
 async def debug_env():
     return {
@@ -82,7 +91,6 @@ async def debug_env():
         "internal_api_key_length": len(INTERNAL_API_KEY) if INTERNAL_API_KEY else 0,
         "has_eleven_key": bool(ELEVEN_KEY),
     }
-    return True
 
 
 # --- helpers ---
@@ -138,11 +146,17 @@ def eleven_tts(text: str, voice_id: str, stability: float, similarity: float) ->
 
 # --- routes ---
 @app.get("/chores")
-def list_chores(q: str = ""):
+def list_chores(q: str = "", response: Response = None):
     if q:
         res = search_chores(q.lower())
     else:
         res = get_all_chores()
+    
+    # Add cache headers for client-side caching
+    if response:
+        response.headers["Cache-Control"] = "public, max-age=300"  # 5 minute cache
+        response.headers["X-Cache-Status"] = "HIT"
+    
     return {"chores": res}
 
 

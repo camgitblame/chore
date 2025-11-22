@@ -21,19 +21,62 @@ export default function Home() {
   // Default voice ID 
   const defaultVoiceId = "21m00Tcm4TlvDq8ikWAM"; 
 
-  // Preload all chores on app start
+  // Preload all chores on app start with timeout and retry
   useEffect(() => {
     const fetchAllChores = async () => {
       setLoadingChores(true);
+      
+      // Check cache first (5 minute cache)
+      const cached = localStorage.getItem('chores_cache');
+      const cacheTime = localStorage.getItem('chores_cache_time');
+      const now = Date.now();
+      
+      if (cached && cacheTime && (now - parseInt(cacheTime)) < 5 * 60 * 1000) {
+        console.log('Loading chores from cache');
+        setAllChores(JSON.parse(cached));
+        setLoadingChores(false);
+        return;
+      }
+      
+      // Fetch with timeout and retry
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
       try {
         const url = `${process.env.NEXT_PUBLIC_API_BASE}/chores`;
-        const response = await fetch(url);
+        const response = await fetch(url, {
+          signal: controller.signal,
+          headers: {
+            'Cache-Control': 'max-age=300' // Request 5 minute cache
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const data = await response.json();
-        setAllChores(data.chores || []);
-      } catch (error) {
+        const chores = data.chores || [];
+        
+        // Cache the results
+        localStorage.setItem('chores_cache', JSON.stringify(chores));
+        localStorage.setItem('chores_cache_time', now.toString());
+        
+        setAllChores(chores);
+      } catch (error: any) {
         console.error('Error fetching chores:', error);
-        setAllChores([]);
+        
+        // Try to use stale cache if available
+        if (cached) {
+          console.log('Using stale cache due to error');
+          setAllChores(JSON.parse(cached));
+        } else {
+          setAllChores([]);
+          // Show user-friendly error
+          alert('Having trouble loading chores. The server might be starting up. Please refresh in a moment.');
+        }
       } finally {
+        clearTimeout(timeoutId);
         setLoadingChores(false);
       }
     };

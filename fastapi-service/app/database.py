@@ -2,8 +2,19 @@ import sqlite3
 import json
 from typing import List, Dict, Optional
 import os
+from functools import lru_cache
 
 DATABASE_PATH = os.path.join(os.path.dirname(__file__), "chores.db")
+
+# Connection pool to reuse database connections
+_db_connection = None
+
+def get_db_connection():
+    """Get a reusable database connection."""
+    global _db_connection
+    if _db_connection is None:
+        _db_connection = sqlite3.connect(DATABASE_PATH, check_same_thread=False)
+    return _db_connection
 
 
 def init_database():
@@ -78,9 +89,10 @@ def init_database():
     conn.close()
 
 
-def get_all_chores() -> List[Dict]:
-    """Get all chores from the database."""
-    conn = sqlite3.connect(DATABASE_PATH)
+@lru_cache(maxsize=1)
+def get_all_chores_cached() -> tuple:
+    """Get all chores with caching (returns tuple for hashability)."""
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     cursor.execute("SELECT id, title, items, steps, time_min FROM chores")
@@ -97,8 +109,12 @@ def get_all_chores() -> List[Dict]:
         }
         chores.append(chore)
 
-    conn.close()
-    return chores
+    return tuple(json.dumps(c) for c in chores)
+
+def get_all_chores() -> List[Dict]:
+    """Get all chores from the database with caching."""
+    cached = get_all_chores_cached()
+    return [json.loads(c) for c in cached]
 
 
 def get_chore_by_id(chore_id: str) -> Optional[Dict]:
