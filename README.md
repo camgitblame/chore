@@ -4,30 +4,28 @@ A Next.js web app that makes household chores easier with AI-powered advice, aud
 
 ## Features
 - **Chore search**: Browse and select from a curated list of common household tasks
-- **Voice guidance**: Clear spoken instructions with ElevenLabs, auto-play on selection, mute control
+- **Voice guidance**: Clear spoken instructions with gTTS (Google Text-to-Speech), auto-play on selection, mute control
 - **Step tracking**: Check off steps and get a congratulation message
-- **AI-Powered Advice**: Get tips fo each chore using RAG with Ollama
+- **AI-Powered Advice**: Get personalized tips for each chore using RAG with Groq's lightning-fast LLM
 - **Retro UI**: Neon-accented, dark theme in arcade style with fast chore search on desktop and mobile
 
 ## Tech Stack
 
 ### Frontend
-- **Framework**: Next.js 15, React 19, TypeScript
-- **Styling**: Tailwind CSS v4
+- **Framework**: Next.js, React, TypeScript
+- **Styling**: Tailwind CSS 
 - **Deployment**: Vercel
 
 ### Backend & AI
-- **API**: FastAPI (deployed on GCR)
-- **Database**: SQLite with chore data
-- **AI Model**: Ollama (llama3.2:1b) for generating advice 
-- **RAG Framework**: LangChain for RAG
-- **Vector Database**: ChromaDB for semantic search
-- **Knowledge Base**: 56 tips for chore across 8 categories
-- **Voice AI**: ElevenLabs API for text-to-speech
+- **API**: FastAPI (deployed on Google Cloud Run)
+- **Database**: SQLite
+- **AI Model**: Groq (llama-3.1-8b-instant)
+- **Knowledge Base**: 56 curated tips across 8 categories (kitchen, bathroom, organization, etc.)
+- **Voice AI**: gTTS (Google Text-to-Speech) 
 
 ### Infrastructure
-- **Backend Hosting**: Google Cloud Run
-- **Containerization**: Docker with multi-stage builds
+- **Backend Hosting**: Google Cloud Run 
+- **Containerization**: Docker 
 
 ## Project Structure
 
@@ -45,19 +43,15 @@ chore_app/
 │   └── package.json          # Frontend dependencies
 ├── fastapi-service/          # Python backend service
 │   ├── app/                  # FastAPI application
-│   │   ├── rag/              # RAG system components
-│   │   │   ├── advice_generator.py    # Main RAG orchestrator
-│   │   │   ├── ollama_client.py       # Ollama LLM client
-│   │   │   └── vector_store.py        # ChromaDB vector operations
-│   │   ├── data/             # Persistent data
-│   │   │   └── vector_store/ # ChromaDB database
-│   │   ├── knowledge/        # Knowledge base
-│   │   │   └── chore_tips.json        # Chore tips
+│   │   ├── rag/              # Knowledge base
+│   │   │   └── knowledge_base.json    # 56 curated chore tips
+│   │   ├── groq_rag.py       # Lightweight RAG with Groq API
 │   │   ├── database.py       # SQLite chore database
-│   │   ├── main.py           # FastAPI app with RAG endpoints
-│   │   └── requirements.txt  # Python dependencies
-│   ├── Dockerfile.ollama     # Production container with Ollama
-│   └── deploy-rag.sh         # Deployment script
+│   │   ├── main.py           # FastAPI app with TTS and advice endpoints
+│   │   ├── requirements-simple.txt    # Minimal dependencies
+│   │   └── .env              # Environment variables (API keys)
+│   ├── Dockerfile.simple     # Lightweight production container
+│   └── chores.db             # SQLite database with 15 chores
 └── README.md                 
 ```
 
@@ -66,7 +60,7 @@ chore_app/
 ### Prerequisites
 
 - Node.js 18+ 
-- ElevenLabs API key 
+- Groq API key (https://console.groq.com) 
 
 ### Installation
 
@@ -84,14 +78,11 @@ npm install
 
 3. Set up environment variables by creating `.env.local` in the `chore/` directory:
 ```bash
-# RAG-enabled backend API endpoint 
-NEXT_PUBLIC_API_BASE=https://chore-api-rag-611389647575.us-central1.run.app
-
-# ElevenLabs API key for text-to-speech
-ELEVENLABS_API_KEY=elevenlabs_api_key
+# Backend API endpoint
+NEXT_PUBLIC_API_BASE=https://your-backend-url.run.app
 
 # Internal API key for secure backend communication
-INTERNAL_API_KEY=internal_api_key
+INTERNAL_API_KEY=your_secure_api_key
 ```
 
 4. Run the development server:
@@ -101,31 +92,25 @@ npm run dev
 
 5. Open [http://localhost:3000](http://localhost:3000) .
 
-## Local RAG Development
+## Local Development
 
-To run the RAG system locally for development:
+To run the backend locally for development:
 
 1. **Install Python dependencies**:
 ```bash
 cd fastapi-service/app
-pip install -r requirements.txt
+pip install -r requirements-simple.txt
 ```
 
-2. **Install Ollama**:
-```bash
-curl -fsSL https://ollama.ai/install.sh | sh
-ollama pull llama3.2:1b
-```
+2. **Get a Groq API key**:
+   - Visit https://console.groq.com/
+   - Create an API key
 
 3. **Set up environment variables**:
 ```bash
 # In fastapi-service/app/.env
-OLLAMA_BASE_URL=http://localhost:11434
-OLLAMA_MODEL=llama3.2:1b
-VECTOR_DB_PATH=./data/vector_store
-ADVICE_ENABLED=true
-ELEVENLABS_API_KEY=elevenlabs_api_key
-INTERNAL_API_KEY=internal_api_key
+GROQ_API_KEY=your_groq_api_key_here
+INTERNAL_API_KEY=your_internal_api_key
 ```
 
 4. **Run the backend**:
@@ -145,12 +130,27 @@ NEXT_PUBLIC_API_BASE=http://localhost:8000
 A demo of the app is deployed at [https://choreapp.vercel.app](https://choreapp.vercel.app/)
 
 
-### Deployment Commands
+### Backend Deployment to Google Cloud Run
+
 ```bash
-# Deploy RAG backend to Google Cloud Run
+# Build and push Docker image
 cd fastapi-service
-./deploy-rag.sh
+docker buildx build --platform linux/amd64 \
+  -f Dockerfile.simple \
+  -t REGION-docker.pkg.dev/PROJECT-ID/REGISTRY-NAME/IMAGE-NAME:latest \
+  --push .
+
+# Deploy to Cloud Run with Groq API key
+gcloud run deploy SERVICE-NAME \
+  --image REGION-docker.pkg.dev/PROJECT-ID/REGISTRY-NAME/IMAGE-NAME:latest \
+  --region REGION \
+  --update-env-vars="GROQ_API_KEY=your_groq_api_key" \
+  --quiet
 ```
+
+### Frontend Deployment
+
+The frontend is automatically deployed to Vercel on push to main branch.
 
 ## How It Works
 
@@ -165,12 +165,10 @@ cd fastapi-service
 
 The RAG system provides:
 
-- **Contextual Advice**: Tips specific to each chore type (kitchen, bathroom, organization, etc.)
-- **Personalized Recommendations**: Considers user context like ADHD, autism, motivation levels
-- **Knowledge Base**: 56 curated tips from cleaning experts and accessibility specialists  
-- **Smart Search**: Vector similarity search finds most relevant advice
-- **AI Generation**: Ollama LLM creates coherent, helpful responses
-
+- **Contextual Tips**: Specific advice for each chore type (kitchen, bathroom, organization, etc.)
+- **Personalized Recommendations**: Considers user context like ADHD, autism, energy levels, motivation
+- **Knowledge Base**: 56 curated tips from cleaning experts and accessibility specialists
+- **Smart Search**: Lightweight keyword-based search finds most relevant advice without heavy embeddings
 
 ---
 

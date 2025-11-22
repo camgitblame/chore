@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+requests
+pydantic
+gTTS
+groq
+numpy
+scikit-learn

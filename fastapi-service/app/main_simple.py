@@ -5,9 +5,8 @@ from pydantic import BaseModel
 from typing import List, Optional
 import os, uuid, requests
 from database import init_database, get_all_chores, get_chore_by_id, search_chores
-from groq_rag import groq_rag
 
-app = FastAPI(title="Chore Coach API - Simple TTS + Groq RAG")
+app = FastAPI(title="Chore Coach API - Simple TTS")
 
 # Initialize the database on startup
 init_database()
@@ -51,11 +50,6 @@ class TTSIn(BaseModel):
     similarity: float = 0.8
 
 
-class AdviceRequest(BaseModel):
-    chore_id: str
-    user_context: Optional[str] = ""
-
-
 def require_api_key(x_api_key: str = Header(default=None)):
     received_key = x_api_key.strip() if x_api_key else None
     expected_key = INTERNAL_API_KEY.strip() if INTERNAL_API_KEY else None
@@ -87,36 +81,24 @@ def chore_script(chore: dict) -> str:
 
 
 async def edge_tts_generate(text: str, voice: str = "en-US-AriaNeural") -> bytes:
-    """Generate TTS using Google Translate TTS (completely free, unlimited)"""
-    from gtts import gTTS
-    import io
+    """Generate TTS using Microsoft Edge TTS (completely free)"""
+    import edge_tts
+    import tempfile
 
     try:
-        # gTTS only supports language codes, not specific voices
-        # Map voice preferences to languages
-        lang = "en"  # Default English
-        tld = "com"  # Top-level domain for accent
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp_file:
+            tmp_path = tmp_file.name
 
-        if "GB" in voice or "british" in voice.lower():
-            tld = "co.uk"  # British accent
-        elif "AU" in voice:
-            tld = "com.au"  # Australian accent
+        communicate = edge_tts.Communicate(text[:1500], voice)
+        await communicate.save(tmp_path)
 
-        # Generate speech
-        tts = gTTS(text=text[:1500], lang=lang, tld=tld, slow=False)
+        with open(tmp_path, "rb") as f:
+            audio_data = f.read()
 
-        # Save to bytes buffer
-        audio_buffer = io.BytesIO()
-        tts.write_to_fp(audio_buffer)
-        audio_buffer.seek(0)
+        os.unlink(tmp_path)
 
-        return audio_buffer.read()
+        return audio_data
     except Exception as e:
-        import traceback
-
-        error_details = traceback.format_exc()
-        print(f"TTS Error: {str(e)}")
-        print(f"Full traceback: {error_details}")
         raise HTTPException(500, f"TTS generation failed: {str(e)}")
 
 
@@ -168,29 +150,3 @@ async def tts(payload: TTSIn, _=Depends(require_api_key)):
         audio = await edge_tts_generate(script, voice)
 
     return Response(audio, media_type="audio/mpeg")
-
-
-@app.post("/advice")
-def get_advice(payload: AdviceRequest, _=Depends(require_api_key)):
-    """Get AI-powered advice using Groq"""
-    chore = get_chore_by_id(payload.chore_id)
-    if not chore:
-        raise HTTPException(404, "Chore not found")
-
-    advice = groq_rag.get_advice(chore, payload.user_context)
-
-    return {
-        "advice": advice,
-        "chore_id": payload.chore_id,
-        "rag_available": groq_rag.is_available(),
-    }
-
-
-@app.get("/advice/status")
-def advice_status():
-    """Check if advice generation is available"""
-    return {
-        "advice_available": groq_rag.is_available(),
-        "service": "groq",
-        "model": "llama-3.1-8b-instant",
-    }

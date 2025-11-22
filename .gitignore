@@ -1,1 +1,6 @@
 RAG_INTEGRATION.md
+
+# Environment variables with API keys
+.env
+*.env
+!.env.example
