@@ -12,7 +12,21 @@ app = FastAPI(title="Chore Coach API - Simple TTS + Groq RAG")
 # Initialize the database on startup
 init_database()
 
-# --- simple env config ---
+# Preload chores into memory to make initial /chores responses faster
+CHORES_CACHE = []
+
+
+@app.on_event("startup")
+def preload_chores():
+    """Load chores into memory once at startup to serve quickly."""
+    global CHORES_CACHE
+    try:
+        CHORES_CACHE = get_all_chores()
+    except Exception:
+        CHORES_CACHE = []
+
+
+# --- env config ---
 INTERNAL_API_KEY = os.getenv("INTERNAL_API_KEY")
 CORS_ORIGIN = os.getenv("CORS_ORIGIN", "*")
 
@@ -87,12 +101,11 @@ def chore_script(chore: dict) -> str:
 
 
 async def edge_tts_generate(text: str, voice: str = "en-US-AriaNeural") -> bytes:
-    """Generate TTS using Google Translate TTS (completely free, unlimited)"""
+    """Generate TTS using Google Translate TTS"""
     from gtts import gTTS
     import io
 
     try:
-        # gTTS only supports language codes, not specific voices
         # Map voice preferences to languages
         lang = "en"  # Default English
         tld = "com"  # Top-level domain for accent
@@ -123,16 +136,34 @@ async def edge_tts_generate(text: str, voice: str = "en-US-AriaNeural") -> bytes
 # --- routes ---
 @app.get("/chores")
 def list_chores(q: str = "", response: Response = None):
+    """Return chores. If query provided, perform search; otherwise return
+    preloaded chores from memory.
+    """
     if q:
+        # For searches, fall back to DB search (lightweight)
         res = search_chores(q.lower())
+        cache_status = "MISS"
     else:
-        res = get_all_chores()
+        # Serve preloaded chores for fastest possible response
+        res = CHORES_CACHE
+        cache_status = "HIT"
 
     if response:
+        # Small cache header for clients / CDNs
         response.headers["Cache-Control"] = "public, max-age=300"
-        response.headers["X-Cache-Status"] = "HIT"
+        response.headers["X-Cache-Status"] = cache_status
 
     return {"chores": res}
+
+
+@app.get("/chores/static")
+def chores_static(response: Response = None):
+    """Explicit endpoint that serves the in-memory chores cache."""
+    if response:
+        response.headers["Cache-Control"] = "public, max-age=3600"
+        response.headers["X-Cache-Status"] = "HIT"
+
+    return {"chores": CHORES_CACHE}
 
 
 @app.get("/chores/{chore_id}")

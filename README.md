@@ -4,27 +4,26 @@ A Next.js web app that makes household chores easier with AI-powered advice, aud
 
 ## Features
 - **Chore search**: Browse and select from a curated list of common household tasks
-- **Voice guidance**: Clear spoken instructions with gTTS (Google Text-to-Speech), auto-play on selection, mute control
+- **Voice guidance**: Clear spoken instructions with gTTS, auto-play on selection, mute control
 - **Step tracking**: Check off steps and get a congratulation message
-- **AI-Powered Advice**: Get personalized tips for each chore using RAG with Groq's lightning-fast LLM
-- **Retro UI**: Neon-accented, dark theme in arcade style with fast chore search on desktop and mobile
+- **AI-Powered Advice**: Get personalized tips for each chore using RAG 
+- **UI**: Neon-accented, dark theme in arcade style with fast chore search on desktop and mobile
 
 ## Tech Stack
 
 ### Frontend
 - **Framework**: Next.js, React, TypeScript
 - **Styling**: Tailwind CSS 
-- **Deployment**: Vercel
 
 ### Backend & AI
 - **API**: FastAPI, Groq API
 - **Database**: SQLite
-- **AI Model**: Llama (llama-3.1-8b-instant via Groq)
+- **AI Model**: Llama (llama-3.1-8b-instant)
 - **Knowledge Base**: Curated tips across 8 categories (kitchen, bathroom, organization, etc.)
 - **Voice AI**: gTTS (Google Text-to-Speech) 
 
 ### Infrastructure
-- **Backend Hosting**: Google Cloud Run 
+- **Backend Hosting**: GCP 
 - **Containerization**: Docker 
 
 ## Project Structure
@@ -46,12 +45,12 @@ chore_app/
 │   │   ├── rag/              # Knowledge base
 │   │   │   └── knowledge_base.json    # Curated chore tips
 │   │   ├── groq_rag.py       # RAG with Groq API
-│   │   ├── database.py       # SQLite chore database
+│   │   ├── database.py       # SQL chore database
 │   │   ├── main.py           # FastAPI app with TTS and advice endpoints
 │   │   ├── requirements-simple.txt    # Dependencies
 │   │   └── .env              # Environment variables 
 │   ├── Dockerfile.simple     # Lightweight production container
-│   └── chores.db             # SQLite database 
+│   └── chores.db             # SQL database 
 └── README.md                 
 ```
 
@@ -81,7 +80,7 @@ npm install
 # Backend API endpoint
 NEXT_PUBLIC_API_BASE=https://your-backend-url.run.app
 
-# Internal API key for secure backend communication
+# Internal API key for secure backend
 INTERNAL_API_KEY=your_secure_api_key
 ```
 
@@ -108,7 +107,7 @@ pip install -r requirements-simple.txt
 
 3. **Set up environment variables**:
 ```bash
-# In fastapi-service/app/.env
+# fastapi-service/app/.env
 GROQ_API_KEY=your_groq_api_key_here
 INTERNAL_API_KEY=your_internal_api_key
 ```
@@ -121,13 +120,9 @@ python -m uvicorn main:app --reload
 
 5. **Update frontend to use local backend**:
 ```bash
-# In chore/.env.local
+# chore/.env.local
 NEXT_PUBLIC_API_BASE=http://localhost:8000
 ```
-
-## Deployment
-
-A demo of the app is deployed at [https://choreapp.vercel.app](https://choreapp.vercel.app/)
 
 
 ### Backend Deployment to Google Cloud Run
@@ -148,27 +143,14 @@ gcloud run deploy SERVICE-NAME \
   --quiet
 ```
 
-### Frontend Deployment
 
-The frontend is automatically deployed to Vercel on push to main branch.
-
-## How It Works
+## Features
 
 1. **Search & Select**: Type chore keywords (e.g., "microwave", "desk", "kitchen") to find a chore
 2. **View Steps**: Click on a chore to see the full step-by-step guide
 3. **Get AI Advice**: Click "Get Advice" for personalized, contextual tips powered by RAG
 4. **Audio Instructions**: Audio instructions automatically play when you select a chore
 5. **Track Progress**: Check off each step as you complete it
-6. **Completion**: A short completion sound plays when all steps are done
-
-## RAG Features
-
-The RAG system provides:
-
-- **Contextual Tips**: Specific advice for each chore type (kitchen, bathroom, organization, etc.)
-- **Personalized Recommendations**: Considers user context like ADHD, autism, energy levels, motivation
-- **Knowledge Base**: Curated tips from cleaning experts and accessibility specialists
-
 
 ---
 

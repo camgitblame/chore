@@ -43,13 +43,32 @@ export default function Home() {
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
       try {
-        const url = `${process.env.NEXT_PUBLIC_API_BASE}/chores`;
-        const response = await fetch(url, {
-          signal: controller.signal,
-          headers: {
-            'Cache-Control': 'max-age=300' // Request 5 minute cache
-          }
-        });
+        // Try the static in-memory endpoint first for fastest response,
+        // then fall back to the dynamic `/chores` endpoint if needed.
+        const staticUrl = `${process.env.NEXT_PUBLIC_API_BASE}/chores/static`;
+        const dynamicUrl = `${process.env.NEXT_PUBLIC_API_BASE}/chores`;
+
+        let response = null;
+
+        // Try static endpoint with short timeout (2s)
+        try {
+          const staticController = new AbortController();
+          const staticTimeout = setTimeout(() => staticController.abort(), 2000);
+          response = await fetch(staticUrl, { signal: staticController.signal });
+          clearTimeout(staticTimeout);
+        } catch (err) {
+          // ignore and fall through to dynamic endpoint
+          response = null;
+        }
+
+        if (!response || !response.ok) {
+          response = await fetch(dynamicUrl, {
+            signal: controller.signal,
+            headers: {
+              'Cache-Control': 'max-age=300' // Request 5 minute cache
+            }
+          });
+        }
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);

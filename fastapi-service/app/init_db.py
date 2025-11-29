@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Database initialization script to set up the SQLite database.
+Database initialization script to set up the SQL database.
 """
 
 from database import init_database, add_chore
 
 
 def add_sample_chores():
-    """Add some additional sample chores to the database."""
+    """Add chores to the database."""
     sample_chores = [
         {
             "id": "bathroom",
