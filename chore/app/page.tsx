@@ -52,14 +52,14 @@ export default function Home() {
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
     
     try {
-      // Try the static in-memory endpoint first for fastest response,
+      // Try static in-memory endpoint first for fast response,
       // then fall back to the dynamic `/chores` endpoint if needed.
       const staticUrl = `${process.env.NEXT_PUBLIC_API_BASE}/chores/static`;
       const dynamicUrl = `${process.env.NEXT_PUBLIC_API_BASE}/chores`;
 
       let response = null;
 
-      // Try static endpoint with short timeout (2s)
+      // Try static endpoint with short timeout 
       try {
         const staticController = new AbortController();
         const staticTimeout = setTimeout(() => staticController.abort(), 2000);
@@ -94,13 +94,13 @@ export default function Home() {
     } catch (error: any) {
       console.error('Error fetching chores:', error);
       
-      // Try to use stale cache if available
+      // Try stale cache if available
       if (cached) {
         console.log('Using stale cache due to error');
         setAllChores(JSON.parse(cached));
       } else {
         setAllChores([]);
-        // Show user-friendly error
+        // Show error
         alert('Having trouble loading chores. The server might be starting up. Please refresh in a moment.');
       }
     } finally {
@@ -191,7 +191,7 @@ export default function Home() {
 
   async function speakCongrats() {
     if (isMuted) return;
-    console.log('Playing congrats message!'); // Debug log
+    console.log('Playing congrats message!');
     setLoadingSpeak(true); setAudioUrl(null); setCongratsPlaying(true);
     const r = await fetch("/api/tts-proxy", {
       method: "POST",
@@ -291,7 +291,7 @@ export default function Home() {
   async function suggestChore() {
     if (!selectedTime || !selectedRoom) return;
     
-    // If we have chores loaded, use client-side filtering
+    // If chores are loaded, use client-side filtering
     if (allChores.length > 0) {
       const locationMatches = allChores.filter(c => 
         c.location?.toLowerCase() === selectedRoom.toLowerCase()
@@ -313,7 +313,7 @@ export default function Home() {
       }
     }
     
-    // Otherwise, fetch from backend by location
+    // if chores are not loaded, fetch from backend by location
     try {
       setLoadingChores(true);
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/chores`);
@@ -353,7 +353,7 @@ export default function Home() {
     }
   }
 
-  // when all steps checked → play congrat message
+  // when all steps checked play congrat message
   useEffect(() => {
     if (!sel || !checked.length) return;
     const all = checked.every(Boolean);
@@ -490,7 +490,7 @@ export default function Home() {
               </div>
             )}
 
-            {/* Browse All Button */}
+            {/* Find Mission Button */}
             <div className="text-center">
               <button
                 onClick={() => {
@@ -504,7 +504,7 @@ export default function Home() {
                   boxShadow: '0 0 5px rgba(156, 163, 175, 0.3)'
                 }}
               >
-                Browse all missions →
+                Find a mission →
               </button>
             </div>
           </div>
