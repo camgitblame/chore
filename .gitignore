@@ -8,3 +8,14 @@ RAG_INTEGRATION.md
 
 # Deployment scripts with sensitive data
 *.sh
+
+# Old/unused files
+fastapi-service/app/main_backup.py
+fastapi-service/app/main_simple.py
+fastapi-service/app/main_with_rag.py
+fastapi-service/Dockerfile.ollama
+fastapi-service/Dockerfile
+fastapi-service/app/requirements.txt
+fastapi-service/app/knowledge/
+fastapi-service/app/data/
+shared/
