@@ -88,7 +88,7 @@ Provide 2-3 helpful tips in a friendly, encouraging tone. Keep it under 150 word
 
             # Call Groq API
             response = self.client.chat.completions.create(
-                model="llama-3.1-8b-instant",  # Fast & free
+                model="llama-3.1-8b-instant",
                 messages=[
                     {
                         "role": "system",
