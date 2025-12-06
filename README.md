@@ -3,11 +3,11 @@
 A Next.js web app that makes household chores easier with AI-powered advice, audio guidance, and step-by-step tracking, designed to support people with ADHD and people on the autism spectrum.
 
 ## Features
-- **Chore search**: Browse and select from a curated list of common household tasks
-- **Voice guidance**: Clear spoken instructions with gTTS, auto-play on selection, mute control
-- **Step tracking**: Check off steps and get a congratulation message
-- **AI-Powered Advice**: Get personalized tips for each chore using RAG 
-- **UI**: Neon-accented, dark theme in arcade style with fast chore search on desktop and mobile
+- **Chore suggestions**: Select time (5/10/20 min) and location (Kitchen, Bedroom, Bathroom, Living Room, Office, Laundry Area) for personalized chore suggestions
+- **Countdown Timer**: Built-in timer for each chore 
+- **Voice Guidance**: Clear spoken instructions with gTTS, auto-play on selection, mute control
+- **Step Tracking**: Check off steps and get a congratulation message with audio celebration
+- **AI-Powered Advice**: Get personalized tips for each chore using RAG with Groq API
 
 ## Tech Stack
 
@@ -19,7 +19,7 @@ A Next.js web app that makes household chores easier with AI-powered advice, aud
 - **API**: FastAPI, Groq API
 - **Database**: SQLite
 - **AI Model**: Llama (llama-3.1-8b-instant)
-- **Knowledge Base**: Curated tips across 8 categories (kitchen, bathroom, organization, etc.)
+- **Knowledge Base**: Curated tips across 8 categories
 - **Voice AI**: gTTS (Google Text-to-Speech) 
 
 ### Infrastructure
@@ -37,20 +37,23 @@ chore_app/
 │   │   │   └── tts-proxy/    # Text-to-speech proxy endpoint
 │   │   ├── globals.css       # Global styles
 │   │   ├── layout.tsx        # Root layout
-│   │   └── page.tsx          # Main chore interface with RAG integration
-│   ├── .env.local            # Environment variables
+│   │   └── page.tsx          # Main UI with home screen, timer, location-based suggestions
+│   ├── public/
+│   │   └── icons/            # SVG icons for room locations
+│   ├── .env.local            # Environment variables (gitignored)
 │   └── package.json          # Frontend dependencies
 ├── fastapi-service/          # Python backend service
 │   ├── app/                  # FastAPI application
 │   │   ├── rag/              # Knowledge base
-│   │   │   └── knowledge_base.json    # Curated chore tips
-│   │   ├── groq_rag.py       # RAG with Groq API
-│   │   ├── database.py       # SQL chore database
-│   │   ├── main.py           # FastAPI app with TTS and advice endpoints
-│   │   ├── requirements-simple.txt    # Dependencies
-│   │   └── .env              # Environment variables 
+│   │   │   └── knowledge_base.json    # 56 curated chore tips
+│   │   ├── groq_rag.py       # RAG implementation with Groq API
+│   │   ├── database.py       # SQLite with location-based queries
+│   │   ├── main.py           # FastAPI app with TTS, advice, and chore endpoints
+│   │   ├── migrate_add_locations.py   # Database migration script
+│   │   ├── requirements-simple.txt    # Production dependencies
+│   │   └── chores.db         # SQLite database (15 chores with locations)
 │   ├── Dockerfile.simple     # Lightweight production container
-│   └── chores.db             # SQL database 
+│   └── venv/                 # Python virtual environment
 └── README.md                 
 ```
 
@@ -144,13 +147,14 @@ gcloud run deploy SERVICE-NAME \
 ```
 
 
-## Features
+## How to Use
 
-1. **Search & Select**: Type chore keywords (e.g., "microwave", "desk", "kitchen") to find a chore
-2. **View Steps**: Click on a chore to see the full step-by-step guide
-3. **Get AI Advice**: Click "Get Advice" for personalized, contextual tips powered by RAG
-4. **Audio Instructions**: Audio instructions automatically play when you select a chore
-5. **Track Progress**: Check off each step as you complete it
+1. **Choose Your Time & Location**: Select how much time you have (5/10/20 minutes) and where you are (Kitchen, Bedroom, Bathroom, Living Room, Office, Laundry Area)
+2. **Get a Suggested Chore**: Click "START MISSION" to get a chore that matches your time and location
+3. **Use the Timer**: Built-in countdown timer helps you stay on track
+4. **Follow Steps**: Check off each step as you complete it with audio guidance
+5. **Get AI Advice**: Click "Get Advice" for personalized, contextual tips powered by RAG
+6. **Browse All Chores**: Click "Browse all missions" to search through all available chores
 
 ---
 

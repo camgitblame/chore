@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-type Chore = { id:string; title:string; items:string[]; steps:string[]; time_min:number };
+type Chore = { id:string; title:string; items:string[]; steps:string[]; time_min:number; location?:string };
 
 export default function Home() {
   const [q, setQ] = useState("");
@@ -31,87 +31,83 @@ export default function Home() {
   // Default voice ID 
   const defaultVoiceId = "21m00Tcm4TlvDq8ikWAM"; 
 
-  // Preload all chores on app start with timeout and retry
-  useEffect(() => {
-    const fetchAllChores = async () => {
-      setLoadingChores(true);
-      
-      // Check cache first (5 minute cache)
-      const cached = localStorage.getItem('chores_cache');
-      const cacheTime = localStorage.getItem('chores_cache_time');
-      const now = Date.now();
-      
-      if (cached && cacheTime && (now - parseInt(cacheTime)) < 5 * 60 * 1000) {
-        console.log('Loading chores from cache');
-        setAllChores(JSON.parse(cached));
-        setLoadingChores(false);
-        return;
-      }
-      
-      // Fetch with timeout and retry
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
-      
+  // Function to fetch all chores (only called when browsing)
+  const fetchAllChores = async () => {
+    setLoadingChores(true);
+    
+    // Check cache first (5 minute cache)
+    const cached = localStorage.getItem('chores_cache');
+    const cacheTime = localStorage.getItem('chores_cache_time');
+    const now = Date.now();
+    
+    if (cached && cacheTime && (now - parseInt(cacheTime)) < 5 * 60 * 1000) {
+      console.log('Loading chores from cache');
+      setAllChores(JSON.parse(cached));
+      setLoadingChores(false);
+      return;
+    }
+    
+    // Fetch with timeout and retry
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
+    try {
+      // Try the static in-memory endpoint first for fastest response,
+      // then fall back to the dynamic `/chores` endpoint if needed.
+      const staticUrl = `${process.env.NEXT_PUBLIC_API_BASE}/chores/static`;
+      const dynamicUrl = `${process.env.NEXT_PUBLIC_API_BASE}/chores`;
+
+      let response = null;
+
+      // Try static endpoint with short timeout (2s)
       try {
-        // Try the static in-memory endpoint first for fastest response,
-        // then fall back to the dynamic `/chores` endpoint if needed.
-        const staticUrl = `${process.env.NEXT_PUBLIC_API_BASE}/chores/static`;
-        const dynamicUrl = `${process.env.NEXT_PUBLIC_API_BASE}/chores`;
-
-        let response = null;
-
-        // Try static endpoint with short timeout (2s)
-        try {
-          const staticController = new AbortController();
-          const staticTimeout = setTimeout(() => staticController.abort(), 2000);
-          response = await fetch(staticUrl, { signal: staticController.signal });
-          clearTimeout(staticTimeout);
-        } catch (err) {
-          // ignore and fall through to dynamic endpoint
-          response = null;
-        }
-
-        if (!response || !response.ok) {
-          response = await fetch(dynamicUrl, {
-            signal: controller.signal,
-            headers: {
-              'Cache-Control': 'max-age=300' // Request 5 minute cache
-            }
-          });
-        }
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const chores = data.chores || [];
-        
-        // Cache the results
-        localStorage.setItem('chores_cache', JSON.stringify(chores));
-        localStorage.setItem('chores_cache_time', now.toString());
-        
-        setAllChores(chores);
-      } catch (error: any) {
-        console.error('Error fetching chores:', error);
-        
-        // Try to use stale cache if available
-        if (cached) {
-          console.log('Using stale cache due to error');
-          setAllChores(JSON.parse(cached));
-        } else {
-          setAllChores([]);
-          // Show user-friendly error
-          alert('Having trouble loading chores. The server might be starting up. Please refresh in a moment.');
-        }
-      } finally {
-        clearTimeout(timeoutId);
-        setLoadingChores(false);
+        const staticController = new AbortController();
+        const staticTimeout = setTimeout(() => staticController.abort(), 2000);
+        response = await fetch(staticUrl, { signal: staticController.signal });
+        clearTimeout(staticTimeout);
+      } catch (err) {
+        // ignore and fall through to dynamic endpoint
+        response = null;
       }
-    };
 
-    fetchAllChores();
-  }, []);
+      if (!response || !response.ok) {
+        response = await fetch(dynamicUrl, {
+          signal: controller.signal,
+          headers: {
+            'Cache-Control': 'max-age=300' // Request 5 minute cache
+          }
+        });
+      }
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      const chores = data.chores || [];
+      
+      // Cache the results
+      localStorage.setItem('chores_cache', JSON.stringify(chores));
+      localStorage.setItem('chores_cache_time', now.toString());
+      
+      setAllChores(chores);
+    } catch (error: any) {
+      console.error('Error fetching chores:', error);
+      
+      // Try to use stale cache if available
+      if (cached) {
+        console.log('Using stale cache due to error');
+        setAllChores(JSON.parse(cached));
+      } else {
+        setAllChores([]);
+        // Show user-friendly error
+        alert('Having trouble loading chores. The server might be starting up. Please refresh in a moment.');
+      }
+    } finally {
+      clearTimeout(timeoutId);
+      setLoadingChores(false);
+    }
+  };
 
   // Client-side filtering for instant results
   useEffect(() => {
@@ -292,48 +288,72 @@ export default function Home() {
     }
   }
 
-  function suggestChore() {
-    if (!selectedTime || !selectedRoom || allChores.length === 0) return;
+  async function suggestChore() {
+    if (!selectedTime || !selectedRoom) return;
     
-    // Filter chores by time and room
-    const roomKeywords: { [key: string]: string[] } = {
-      kitchen: ['kitchen', 'microwave', 'dishes', 'counter', 'sink', 'fridge'],
-      bedroom: ['bedroom', 'bed', 'closet', 'desk', 'laundry'],
-      bathroom: ['bathroom', 'toilet', 'shower', 'mirror', 'sink']
-    };
-
-    const keywords = roomKeywords[selectedRoom.toLowerCase()] || [];
-    
-    let candidates = allChores.filter(c => {
-      // Match time window (within 5 minutes)
-      const timeMatch = Math.abs(c.time_min - selectedTime) <= 5;
-      
-      // Match room keywords
-      const titleLower = c.title.toLowerCase();
-      const idLower = c.id.toLowerCase();
-      const roomMatch = keywords.some(k => 
-        titleLower.includes(k) || idLower.includes(k)
+    // If we have chores loaded, use client-side filtering
+    if (allChores.length > 0) {
+      const locationMatches = allChores.filter(c => 
+        c.location?.toLowerCase() === selectedRoom.toLowerCase()
       );
       
-      return timeMatch && roomMatch;
-    });
-
-    // If no exact match, try just time-based
-    if (candidates.length === 0) {
-      candidates = allChores.filter(c => 
+      const timeMatches = locationMatches.filter(c => 
         Math.abs(c.time_min - selectedTime) <= 5
       );
+      
+      const candidates = timeMatches.length > 0 ? timeMatches : locationMatches;
+      
+      if (candidates.length > 0) {
+        const randomChore = candidates[Math.floor(Math.random() * candidates.length)];
+        setSel(randomChore);
+        setTimerSeconds(selectedTime * 60);
+        setTimerRunning(true);
+        setShowHome(false);
+        return;
+      }
     }
-
-    // Pick a random candidate
-    if (candidates.length > 0) {
-      const randomChore = candidates[Math.floor(Math.random() * candidates.length)];
-      setSel(randomChore);
-      setShowHome(false);
+    
+    // Otherwise, fetch from backend by location
+    try {
+      setLoadingChores(true);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/chores`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch chores');
+      }
+      
+      const data = await response.json();
+      const chores = data.chores || [];
+      
+      // Filter by location and time
+      const locationMatches = chores.filter((c: Chore) => 
+        c.location?.toLowerCase() === selectedRoom.toLowerCase()
+      );
+      
+      const timeMatches = locationMatches.filter((c: Chore) => 
+        Math.abs(c.time_min - selectedTime) <= 5
+      );
+      
+      const candidates = timeMatches.length > 0 ? timeMatches : locationMatches;
+      
+      if (candidates.length > 0) {
+        const randomChore = candidates[Math.floor(Math.random() * candidates.length)];
+        setSel(randomChore);
+        setTimerSeconds(selectedTime * 60);
+        setTimerRunning(true);
+        setShowHome(false);
+      } else {
+        alert(`No chores found for ${selectedRoom}`);
+      }
+    } catch (error) {
+      console.error('Error fetching chores:', error);
+      alert('Failed to load chores. Please try again.');
+    } finally {
+      setLoadingChores(false);
     }
   }
 
-  // when all steps checked → auto congrats
+  // when all steps checked → play congrat message
   useEffect(() => {
     if (!sel || !checked.length) return;
     const all = checked.every(Boolean);
@@ -366,25 +386,8 @@ export default function Home() {
           </p>
         </div>
 
-        {/* Loading state for chore database load */}
-        {loadingChores && allChores.length === 0 && (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div className="animate-spin text-6xl text-cyan-400 mb-4">◆</div>
-              <div className="text-xl font-mono tracking-widest text-cyan-400" style={{
-                textShadow: '0 0 10px rgba(34, 211, 238, 0.8)'
-              }}>
-                INITIALIZING MISSION DATABASE...
-              </div>
-              <div className="mt-4 text-sm text-gray-400 font-mono">
-                Loading chore protocols...
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Home Screen - Time and Room Selection */}
-        {!loadingChores && showHome && !sel && (
+        {showHome && !sel && (
           <div className="max-w-2xl mx-auto space-y-8">
             {/* Time Selection */}
             <div className="bg-black border-4 border-cyan-400 p-6 rounded-none" style={{
@@ -434,7 +437,10 @@ export default function Home() {
                 {[
                   { name: 'Kitchen', icon: '/icons/kitchen.svg' },
                   { name: 'Bedroom', icon: '/icons/bedroom.svg' },
-                  { name: 'Bathroom', icon: '/icons/bathroom.svg' }
+                  { name: 'Bathroom', icon: '/icons/bathroom.svg' },
+                  { name: 'Living Room', icon: '/icons/living-room.svg' },
+                  { name: 'Office', icon: '/icons/office.svg' },
+                  { name: 'Laundry Area', icon: '/icons/laundry.svg' }
                 ].map(room => (
                   <button
                     key={room.name}
@@ -487,7 +493,12 @@ export default function Home() {
             {/* Browse All Button */}
             <div className="text-center">
               <button
-                onClick={() => setShowHome(false)}
+                onClick={() => {
+                  setShowHome(false);
+                  if (allChores.length === 0) {
+                    fetchAllChores();
+                  }
+                }}
                 className="px-6 py-3 bg-black border-2 border-gray-600 text-gray-400 font-mono tracking-wide rounded-none hover:border-cyan-400 hover:text-cyan-400 transition-all duration-200"
                 style={{
                   boxShadow: '0 0 5px rgba(156, 163, 175, 0.3)'
@@ -514,23 +525,41 @@ export default function Home() {
                 ◄ Back to Home
               </button>
             </div>
-            
-            <div className="relative">
-              <input
-                value={q}
-                onChange={e => setQ(e.target.value)}
-                placeholder="SEARCH MISSIONS... [TYPE HERE]"
-                className="w-full p-4 text-lg bg-black border-2 border-magenta-500 text-cyan-400 placeholder-magenta-400 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 rounded-none font-mono tracking-wide"
-                disabled={loadingChores && allChores.length === 0}
-                style={{
-                  boxShadow: 'inset 0 0 10px rgba(139, 69, 19, 0.3)',
-                  textShadow: '0 0 5px rgba(34, 211, 238, 0.5)'
-                }}
-              />
-              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-magenta-400 text-xl">
-                ◆
+
+            {/* Loading state when fetching chores */}
+            {loadingChores && allChores.length === 0 && (
+              <div className="flex items-center justify-center py-20">
+                <div className="text-center">
+                  <div className="animate-spin text-6xl text-cyan-400 mb-4">◆</div>
+                  <div className="text-xl font-mono tracking-widest text-cyan-400" style={{
+                    textShadow: '0 0 10px rgba(34, 211, 238, 0.8)'
+                  }}>
+                    LOADING MISSION DATABASE...
+                  </div>
+                  <div className="mt-4 text-sm text-gray-400 font-mono">
+                    Fetching chore protocols...
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
+            
+            {!loadingChores && (
+              <div className="relative">
+                <input
+                  value={q}
+                  onChange={e => setQ(e.target.value)}
+                  placeholder="SEARCH MISSIONS... [TYPE HERE]"
+                  className="w-full p-4 text-lg bg-black border-2 border-magenta-500 text-cyan-400 placeholder-magenta-400 focus:outline-none focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 rounded-none font-mono tracking-wide"
+                  style={{
+                    boxShadow: 'inset 0 0 10px rgba(139, 69, 19, 0.3)',
+                    textShadow: '0 0 5px rgba(34, 211, 238, 0.5)'
+                  }}
+                />
+                <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-magenta-400 text-xl">
+                  ◆
+                </div>
+              </div>
+            )}
             {q && !loadingChores && (
               <div className="mt-6 space-y-3">
                 {filteredChores.length > 0 ? (

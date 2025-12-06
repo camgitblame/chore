@@ -96,7 +96,7 @@ def get_all_chores_cached() -> tuple:
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT id, title, items, steps, time_min FROM chores")
+    cursor.execute("SELECT id, title, items, steps, time_min, location FROM chores")
     rows = cursor.fetchall()
 
     chores = []
@@ -107,6 +107,7 @@ def get_all_chores_cached() -> tuple:
             "items": json.loads(row[2]) if row[2] else [],
             "steps": json.loads(row[3]) if row[3] else [],
             "time_min": row[4],
+            "location": row[5] if len(row) > 5 else None,
         }
         chores.append(chore)
 
@@ -125,7 +126,8 @@ def get_chore_by_id(chore_id: str) -> Optional[Dict]:
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT id, title, items, steps, time_min FROM chores WHERE id = ?", (chore_id,)
+        "SELECT id, title, items, steps, time_min, location FROM chores WHERE id = ?",
+        (chore_id,),
     )
     row = cursor.fetchone()
 
@@ -136,6 +138,7 @@ def get_chore_by_id(chore_id: str) -> Optional[Dict]:
             "items": json.loads(row[2]) if row[2] else [],
             "steps": json.loads(row[3]) if row[3] else [],
             "time_min": row[4],
+            "location": row[5] if len(row) > 5 else None,
         }
         conn.close()
         return chore
@@ -150,7 +153,7 @@ def search_chores(query: str) -> List[Dict]:
     cursor = conn.cursor()
 
     cursor.execute(
-        "SELECT id, title, items, steps, time_min FROM chores WHERE title LIKE ?",
+        "SELECT id, title, items, steps, time_min, location FROM chores WHERE title LIKE ?",
         (f"%{query}%",),
     )
     rows = cursor.fetchall()
@@ -163,6 +166,7 @@ def search_chores(query: str) -> List[Dict]:
             "items": json.loads(row[2]) if row[2] else [],
             "steps": json.loads(row[3]) if row[3] else [],
             "time_min": row[4],
+            "location": row[5] if len(row) > 5 else None,
         }
         chores.append(chore)
 

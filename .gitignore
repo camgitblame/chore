@@ -2,5 +2,9 @@ RAG_INTEGRATION.md
 
 # Environment variables with API keys
 .env
+.env.local
 *.env
 !.env.example
+
+# Deployment scripts with sensitive data
+*.sh
