@@ -37,22 +37,21 @@ chore_app/
 │   │   │   └── tts-proxy/    # Text-to-speech proxy endpoint
 │   │   ├── globals.css       # Global styles
 │   │   ├── layout.tsx        # Root layout
-│   │   └── page.tsx          # Main UI with home screen, timer, location-based suggestions
+│   │   └── page.tsx          # Main UI 
 │   ├── public/
-│   │   └── icons/            # SVG icons for room locations
+│   │   └── icons/            # SVG icons 
 │   ├── .env.local            # Environment variables (gitignored)
 │   └── package.json          # Frontend dependencies
 ├── fastapi-service/          # Python backend service
 │   ├── app/                  # FastAPI application
 │   │   ├── rag/              # Knowledge base
-│   │   │   └── knowledge_base.json    # 56 curated chore tips
+│   │   │   └── knowledge_base.json    # Chore tips
 │   │   ├── groq_rag.py       # RAG implementation with Groq API
-│   │   ├── database.py       # SQLite with location-based queries
+│   │   ├── database.py       # SQLite queries
 │   │   ├── main.py           # FastAPI app with TTS, advice, and chore endpoints
-│   │   ├── migrate_add_locations.py   # Database migration script
-│   │   ├── requirements-simple.txt    # Production dependencies
-│   │   └── chores.db         # SQLite database (15 chores with locations)
-│   ├── Dockerfile.simple     # Lightweight production container
+│   │   ├── requirements-simple.txt    # Dependencies
+│   │   └── chores.db         # SQLite database 
+│   ├── Dockerfile.simple     # Production container
 │   └── venv/                 # Python virtual environment
 └── README.md                 
 ```
