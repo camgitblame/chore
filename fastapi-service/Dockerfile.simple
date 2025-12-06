@@ -1,4 +1,4 @@
-# Lightweight Dockerfile for Chore API with Edge TTS (no RAG)
+# Dockerfile for Chore API with TTS 
 FROM python:3.11-slim
 
 WORKDIR /app
