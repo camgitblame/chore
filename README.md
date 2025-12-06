@@ -146,16 +146,6 @@ gcloud run deploy SERVICE-NAME \
   --quiet
 ```
 
-
-## How to Use
-
-1. **Choose Your Time & Location**: Select how much time you have (5/10/20 minutes) and where you are (Kitchen, Bedroom, Bathroom, Living Room, Office, Laundry Area)
-2. **Get a Suggested Chore**: Click "START MISSION" to get a chore that matches your time and location
-3. **Use the Timer**: Built-in countdown timer helps you stay on track
-4. **Follow Steps**: Check off each step as you complete it with audio guidance
-5. **Get AI Advice**: Click "Get Advice" for personalized, contextual tips powered by RAG
-6. **Browse All Chores**: Click "Browse all missions" to search through all available chores
-
 ---
 
 Built with 💛 for the neurodivergent community by [Cam Nguyen](https://github.com/camgitblame)
