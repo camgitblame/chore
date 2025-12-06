@@ -1,12 +1,10 @@
-RAG_INTEGRATION.md
-
-# Environment variables with API keys
+# env files
 .env
 .env.local
 *.env
 !.env.example
 
-# Deployment scripts with sensitive data
+# Deployment scripts
 *.sh
 
 # Old/unused files
