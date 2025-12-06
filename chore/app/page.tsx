@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type Chore = { id:string; title:string; items:string[]; steps:string[]; time_min:number };
 
@@ -17,6 +18,15 @@ export default function Home() {
   const [advice, setAdvice] = useState<string | null>(null);
   const [loadingAdvice, setLoadingAdvice] = useState(false);
   const [showAdvice, setShowAdvice] = useState(false);
+
+  // Home screen state
+  const [selectedTime, setSelectedTime] = useState<number | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+  const [showHome, setShowHome] = useState(true);
+
+  // Timer state
+  const [timerSeconds, setTimerSeconds] = useState(0);
+  const [timerRunning, setTimerRunning] = useState(false);
 
   // Default voice ID 
   const defaultVoiceId = "21m00Tcm4TlvDq8ikWAM"; 
@@ -127,7 +137,29 @@ export default function Home() {
     setChecked(sel?.steps?.map(() => false) || []); 
     setAdvice(null);
     setShowAdvice(false);
+    // Start timer when chore is selected
+    if (sel && selectedTime) {
+      setTimerSeconds(selectedTime * 60);
+      setTimerRunning(true);
+    }
   }, [sel]);
+
+  // Timer countdown effect
+  useEffect(() => {
+    if (!timerRunning || timerSeconds <= 0) return;
+    
+    const interval = setInterval(() => {
+      setTimerSeconds(prev => {
+        if (prev <= 1) {
+          setTimerRunning(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timerRunning, timerSeconds]);
 
   // Auto-speak chore when selected
   useEffect(() => {
@@ -214,12 +246,90 @@ export default function Home() {
       const data = await response.json();
       setAdvice(data.advice);
       setShowAdvice(true);
+      
+      // Read advice aloud if audio is enabled
+      if (!isMuted && data.advice) {
+        await speakText(data.advice);
+      }
     } catch (error) {
       console.error("Error getting advice:", error);
       setAdvice("Sorry, I couldn't generate advice right now. Try breaking the task into smaller steps and remember that done is better than perfect!");
       setShowAdvice(true);
     } finally {
       setLoadingAdvice(false);
+    }
+  }
+
+  async function speakText(text: string) {
+    if (isMuted) return;
+    setLoadingSpeak(true);
+    
+    try {
+      const r = await fetch("/api/tts-proxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, voice_id: defaultVoiceId })
+      });
+      
+      if (!r.ok) {
+        setLoadingSpeak(false);
+        return;
+      }
+
+      const ct = r.headers.get("content-type") || "";
+      if (ct.includes("application/json")) {
+        const data = await r.json();
+        setAudioUrl(data.audio_url);
+      } else {
+        const buf = await r.arrayBuffer();
+        const blob = new Blob([buf], { type: "audio/mpeg" });
+        setAudioUrl(URL.createObjectURL(blob));
+      }
+    } catch (error) {
+      console.error("TTS error:", error);
+    } finally {
+      setLoadingSpeak(false);
+    }
+  }
+
+  function suggestChore() {
+    if (!selectedTime || !selectedRoom || allChores.length === 0) return;
+    
+    // Filter chores by time and room
+    const roomKeywords: { [key: string]: string[] } = {
+      kitchen: ['kitchen', 'microwave', 'dishes', 'counter', 'sink', 'fridge'],
+      bedroom: ['bedroom', 'bed', 'closet', 'desk', 'laundry'],
+      bathroom: ['bathroom', 'toilet', 'shower', 'mirror', 'sink']
+    };
+
+    const keywords = roomKeywords[selectedRoom.toLowerCase()] || [];
+    
+    let candidates = allChores.filter(c => {
+      // Match time window (within 5 minutes)
+      const timeMatch = Math.abs(c.time_min - selectedTime) <= 5;
+      
+      // Match room keywords
+      const titleLower = c.title.toLowerCase();
+      const idLower = c.id.toLowerCase();
+      const roomMatch = keywords.some(k => 
+        titleLower.includes(k) || idLower.includes(k)
+      );
+      
+      return timeMatch && roomMatch;
+    });
+
+    // If no exact match, try just time-based
+    if (candidates.length === 0) {
+      candidates = allChores.filter(c => 
+        Math.abs(c.time_min - selectedTime) <= 5
+      );
+    }
+
+    // Pick a random candidate
+    if (candidates.length > 0) {
+      const randomChore = candidates[Math.floor(Math.random() * candidates.length)];
+      setSel(randomChore);
+      setShowHome(false);
     }
   }
 
@@ -273,8 +383,138 @@ export default function Home() {
           </div>
         )}
 
-        {!sel && (
+        {/* Home Screen - Time and Room Selection */}
+        {!loadingChores && showHome && !sel && (
+          <div className="max-w-2xl mx-auto space-y-8">
+            {/* Time Selection */}
+            <div className="bg-black border-4 border-cyan-400 p-6 rounded-none" style={{
+              boxShadow: '0 0 30px rgba(34, 211, 238, 0.4), inset 0 0 30px rgba(34, 211, 238, 0.1)'
+            }}>
+              <h2 className="text-2xl font-bold text-cyan-400 mb-6 font-mono tracking-widest text-center" style={{
+                textShadow: '0 0 10px rgba(34, 211, 238, 0.8)'
+              }}>
+                HOW MUCH TIME DO YOU HAVE?
+              </h2>
+              <div className="grid grid-cols-3 gap-4">
+                {[5, 10, 20].map(time => (
+                  <button
+                    key={time}
+                    onClick={() => setSelectedTime(time)}
+                    className={`p-6 border-2 rounded-none transition-all duration-200 font-mono tracking-wide ${
+                      selectedTime === time
+                        ? 'bg-green-900 bg-opacity-50 border-green-400 text-green-400'
+                        : 'bg-black border-yellow-400 text-yellow-400 hover:border-cyan-400 hover:text-cyan-400'
+                    }`}
+                    style={{
+                      boxShadow: selectedTime === time
+                        ? '0 0 20px rgba(34, 197, 94, 0.5)'
+                        : '0 0 10px rgba(251, 191, 36, 0.3)',
+                      textShadow: selectedTime === time
+                        ? '0 0 10px rgba(34, 197, 94, 0.8)'
+                        : '0 0 5px rgba(251, 191, 36, 0.5)'
+                    }}
+                  >
+                    <div className="text-4xl font-bold mb-2">{time}</div>
+                    <div className="text-sm">MINUTES</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Room Selection */}
+            <div className="bg-black border-4 border-purple-400 p-6 rounded-none" style={{
+              boxShadow: '0 0 30px rgba(147, 51, 234, 0.4), inset 0 0 30px rgba(147, 51, 234, 0.1)'
+            }}>
+              <h2 className="text-2xl font-bold text-purple-400 mb-6 font-mono tracking-widest text-center" style={{
+                textShadow: '0 0 10px rgba(147, 51, 234, 0.8)'
+              }}>
+                WHERE ARE YOU?
+              </h2>
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { name: 'Kitchen', icon: '/icons/kitchen.svg' },
+                  { name: 'Bedroom', icon: '/icons/bedroom.svg' },
+                  { name: 'Bathroom', icon: '/icons/bathroom.svg' }
+                ].map(room => (
+                  <button
+                    key={room.name}
+                    onClick={() => setSelectedRoom(room.name)}
+                    className={`p-6 border-2 rounded-none transition-all duration-200 font-mono tracking-wide ${
+                      selectedRoom === room.name
+                        ? 'bg-green-900 bg-opacity-50 border-green-400 text-green-400'
+                        : 'bg-black border-magenta-500 text-magenta-400 hover:border-cyan-400 hover:text-cyan-400'
+                    }`}
+                    style={{
+                      boxShadow: selectedRoom === room.name
+                        ? '0 0 20px rgba(34, 197, 94, 0.5)'
+                        : '0 0 10px rgba(236, 72, 153, 0.3)',
+                      textShadow: selectedRoom === room.name
+                        ? '0 0 10px rgba(34, 197, 94, 0.8)'
+                        : '0 0 5px rgba(236, 72, 153, 0.5)'
+                    }}
+                  >
+                    <div className="mb-2 flex justify-center">
+                      <Image
+                        src={room.icon}
+                        alt={room.name}
+                        width={48}
+                        height={48}
+                        className={selectedRoom === room.name ? 'brightness-125' : 'brightness-100'}
+                      />
+                    </div>
+                    <div className="text-sm">{room.name.toUpperCase()}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Start Mission Button */}
+            {selectedTime && selectedRoom && (
+              <div className="text-center">
+                <button
+                  onClick={suggestChore}
+                  className="px-12 py-6 bg-green-900 bg-opacity-50 border-4 border-green-400 text-green-400 font-bold text-2xl rounded-none hover:bg-opacity-70 transition-all duration-200 animate-pulse font-mono tracking-widest"
+                  style={{
+                    boxShadow: '0 0 30px rgba(34, 197, 94, 0.6)',
+                    textShadow: '0 0 15px rgba(251, 191, 36, 1)'
+                  }}
+                >
+                  ▶ START MISSION
+                </button>
+              </div>
+            )}
+
+            {/* Browse All Button */}
+            <div className="text-center">
+              <button
+                onClick={() => setShowHome(false)}
+                className="px-6 py-3 bg-black border-2 border-gray-600 text-gray-400 font-mono tracking-wide rounded-none hover:border-cyan-400 hover:text-cyan-400 transition-all duration-200"
+                style={{
+                  boxShadow: '0 0 5px rgba(156, 163, 175, 0.3)'
+                }}
+              >
+                Browse all missions →
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Search Interface when not on home screen */}
+        {!sel && !showHome && (
           <div className="max-w-xl mx-auto">
+            {/* Back to Home Button */}
+            <div className="mb-6">
+              <button
+                onClick={() => setShowHome(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-black border-2 border-gray-600 text-gray-400 font-mono tracking-wide rounded-none hover:border-cyan-400 hover:text-cyan-400 transition-all duration-200"
+                style={{
+                  boxShadow: '0 0 5px rgba(156, 163, 175, 0.3)'
+                }}
+              >
+                ◄ Back to Home
+              </button>
+            </div>
+            
             <div className="relative">
               <input
                 value={q}
@@ -341,7 +581,12 @@ export default function Home() {
               <div className="flex items-center gap-4 mb-6">
                 <button 
                   className="flex items-center gap-2 px-4 py-2 bg-black border-2 border-red-500 hover:border-red-400 hover:bg-red-900 hover:bg-opacity-30 transition-all duration-200 text-red-400 font-mono tracking-wide rounded-none"
-                  onClick={() => setSel(null)}
+                  onClick={() => {
+                    setSel(null);
+                    setShowHome(true);
+                    setTimerRunning(false);
+                    setTimerSeconds(0);
+                  }}
                   style={{
                     textShadow: '0 0 5px rgba(239, 68, 68, 0.5)',
                     boxShadow: '0 0 10px rgba(239, 68, 68, 0.3)'
@@ -361,6 +606,32 @@ export default function Home() {
                     MISSION TIME: ~{sel.time_min} MINUTES
                   </p>
                 </div>
+                {/* Timer Display */}
+                {selectedTime && (
+                  <div className="flex items-center gap-2">
+                    <div className="bg-black border-2 border-cyan-400 px-4 py-2 rounded-none" style={{
+                      boxShadow: '0 0 15px rgba(34, 211, 238, 0.5)'
+                    }}>
+                      <div className="text-cyan-400 font-mono text-2xl font-bold" style={{
+                        textShadow: '0 0 10px rgba(34, 211, 238, 0.8)'
+                      }}>
+                        {Math.floor(timerSeconds / 60)}:{String(timerSeconds % 60).padStart(2, '0')}
+                      </div>
+                      <div className="text-xs text-gray-400 text-center">
+                        {timerRunning ? 'RUNNING' : 'PAUSED'}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setTimerRunning(!timerRunning)}
+                      className="px-3 py-2 bg-black border-2 border-yellow-400 text-yellow-400 font-mono text-sm rounded-none hover:border-cyan-400 hover:text-cyan-400 transition-all duration-200"
+                      style={{
+                        boxShadow: '0 0 10px rgba(251, 191, 36, 0.3)'
+                      }}
+                    >
+                      {timerRunning ? '⏸ PAUSE' : '▶ RESUME'}
+                    </button>
+                  </div>
+                )}
               </div>
 
               {sel.items?.length ? (
@@ -575,7 +846,7 @@ export default function Home() {
         <p className="text-gray-500 text-sm font-mono tracking-widest" style={{
           textShadow: '0 0 3px rgba(107, 114, 128, 0.5)'
         }}>
-          ▓ Developed by{' '}
+          Built with 💛 for the neurodivergent community by{' '}
           <button
             onClick={() => window.open('https://camgitblame.netlify.app/', '_blank')}
             className="text-cyan-400 hover:text-cyan-300 transition-colors duration-200 cursor-pointer underline decoration-dotted hover:decoration-solid"
@@ -585,7 +856,7 @@ export default function Home() {
           >
             Cam Nguyen
           </button>
-          {' '}© 2025 ▓
+          {' '}© 2025
         </p>
       </footer>
     </div>
